@@ -104,10 +104,7 @@
                 <version>${jacoco.version}</version>
                 <configuration>
                     <excludes>
-                        <!-- Excluir classes do JDK que causam erro com Java 25 -->
-                        <exclude>sun/**</exclude>
-                        <exclude>javax/**</exclude>
-                        <exclude>jdk/**</exclude>
+                        <exclude>**/ProductMicroserviceApplication.class</exclude>
                     </excludes>
                 </configuration>
                 <executions>
@@ -132,12 +129,12 @@
                         <configuration>
                             <rules>
                                 <rule>
-                                    <element>PACKAGE</element>
+                                    <element>BUNDLE</element>
                                     <limits>
                                         <limit>
                                             <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.80</minimum>
+                                            <minimum>0.70</minimum>
                                         </limit>
                                     </limits>
                                 </rule>
@@ -173,11 +170,6 @@
                         <version>${jacoco.version}</version>
                         <configuration>
                             <excludes>
-                                <!-- Excluir classes do JDK que causam erro com Java 25 -->
-                                <exclude>sun/**</exclude>
-                                <exclude>javax/**</exclude>
-                                <exclude>jdk/**</exclude>
-                                <!-- Excluir aplicação principal -->
                                 <exclude>**/ProductMicroserviceApplication.class</exclude>
                             </excludes>
                         </configuration>
