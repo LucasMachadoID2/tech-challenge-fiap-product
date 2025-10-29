@@ -171,6 +171,16 @@
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
                         <version>${jacoco.version}</version>
+                        <configuration>
+                            <excludes>
+                                <!-- Excluir classes do JDK que causam erro com Java 25 -->
+                                <exclude>sun/**</exclude>
+                                <exclude>javax/**</exclude>
+                                <exclude>jdk/**</exclude>
+                                <!-- Excluir aplicação principal -->
+                                <exclude>**/ProductMicroserviceApplication.class</exclude>
+                            </excludes>
+                        </configuration>
                         <executions>
                             <execution>
                                 <id>prepare-agent</id>
