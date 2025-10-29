@@ -59,7 +59,6 @@ class GlobalExceptionHandlerTest {
         request.setName(""); // Invalid: empty name
         request.setDescription("Test");
         request.setCategory("LANCHE");
-        // Missing required price field
         
         mockMvc.perform(post("/api/products")
                         .contentType(MediaType.APPLICATION_JSON)
