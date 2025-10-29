@@ -17,6 +17,19 @@
         <java.version>17</java.version>
         <cucumber.version>7.14.0</cucumber.version>
         <jacoco.version>0.8.12</jacoco.version>
+        
+        <!-- SonarQube Properties -->
+        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+        <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+        <sonar.jacoco.reportPath>${project.basedir}/target/jacoco.exec</sonar.jacoco.reportPath>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.language>java</sonar.language>
+        <sonar.exclusions>**/config/**,**/dto/**,**/entity/**,**/entities/**</sonar.exclusions>
+        <sonar.coverage.exclusions>
+            **/config/**,
+            **/dto/**,
+            **/ProductMicroserviceApplication.java
+        </sonar.coverage.exclusions>
     </properties>
     <dependencies>
         <dependency>
@@ -148,4 +161,49 @@
             </plugin>
         </plugins>
     </build>
+    
+    <profiles>
+        <profile>
+            <id>coverage</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco.version}</version>
+                        <configuration>
+                            <excludes>
+                                <!-- Excluir classes do JDK que causam erro com Java 25 -->
+                                <exclude>sun/**</exclude>
+                                <exclude>javax/**</exclude>
+                                <exclude>jdk/**</exclude>
+                                <!-- Excluir aplicação principal -->
+                                <exclude>**/ProductMicroserviceApplication.class</exclude>
+                            </excludes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                                <configuration>
+                                    <formats>
+                                        <format>XML</format>
+                                        <format>HTML</format>
+                                    </formats>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
