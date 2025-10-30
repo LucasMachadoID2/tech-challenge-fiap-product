@@ -32,5 +32,5 @@ jobs:
         run: |
           mvn sonar:sonar \
             -Dsonar.projectKey=LucasMachadoID2_tech-challenge-fiap-product \
-            -Dsonar.organization=LucasMachadoID2 \
+            -Dsonar.organization=lucasmachadoid2 \
             -Dsonar.host.url=https://sonarcloud.io
