@@ -87,3 +87,7 @@ application-local.properties
 
 # Docker
 .dockerignore
+
+# Kubernetes - Local files with sensitive data
+k8s/*.local.yaml
+k8s/*-local.yaml
