@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+  labels:
+    app: mongodb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+        - name: mongodb
+          image: mongo:7.0
+          ports:
+            - containerPort: 27018
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: ${MONGODB_USERNAME}
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              value: ${MONGODB_PASSWORD}
+            - name: MONGO_INITDB_DATABASE
+              value: product_db
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"

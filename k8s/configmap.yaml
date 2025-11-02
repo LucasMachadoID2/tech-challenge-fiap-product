@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: product-ms-config
+  labels:
+    app: app-product
+data:
+  SPRING_PROFILES_ACTIVE: "default"
+  LOGGING_LEVEL_ROOT: "INFO"
+  SERVER_PORT: "8081"

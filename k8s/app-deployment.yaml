@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-product
+  labels:
+    app: app-product
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: app-product
+  template:
+    metadata:
+      labels:
+        app: app-product
+    spec:
+      containers:
+        - name: app-product
+          image: gguihermegarcia1/tech-challenge-fiap-product:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8081
+          envFrom:
+            - configMapRef:
+                name: product-ms-config
+            - secretRef:
+                name: product-ms-secrets
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8081
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8081
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
