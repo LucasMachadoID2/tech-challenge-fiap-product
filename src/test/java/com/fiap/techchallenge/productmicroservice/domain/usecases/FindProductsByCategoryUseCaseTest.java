@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -96,5 +97,15 @@ class FindProductsByCategoryUseCaseTest {
         }
         
         verify(productRepository, times(4)).findByCategory(any(CategoryEnum.class));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when category is null")
+    void shouldThrowExceptionWhenCategoryIsNull() {
+        assertThatThrownBy(() -> useCase.execute(null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Categoria é obrigatória");
+
+        verify(productRepository, never()).findByCategory(any());
     }
 }

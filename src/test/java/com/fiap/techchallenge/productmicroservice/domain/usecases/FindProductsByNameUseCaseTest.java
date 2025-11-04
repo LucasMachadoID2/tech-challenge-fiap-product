@@ -137,4 +137,43 @@ class FindProductsByNameUseCaseTest {
         assertThat(result).isEmpty();
         verify(productRepository, times(1)).findByNameContaining("X-Burger");
     }
+
+    @Test
+    @DisplayName("Should find products with case-insensitive search")
+    void shouldFindProductsWithCaseInsensitiveSearch() {
+        when(productRepository.findByNameContaining("pizza"))
+                .thenReturn(Arrays.asList(product1, product2));
+
+        List<Product> result = useCase.execute("pizza");
+
+        assertThat(result).isNotNull();
+        assertThat(result).hasSize(2);
+        verify(productRepository, times(1)).findByNameContaining("pizza");
+    }
+
+    @Test
+    @DisplayName("Should handle search with numbers")
+    void shouldHandleSearchWithNumbers() {
+        when(productRepository.findByNameContaining("Burger123"))
+                .thenReturn(Collections.emptyList());
+
+        List<Product> result = useCase.execute("Burger123");
+
+        assertThat(result).isNotNull();
+        assertThat(result).isEmpty();
+        verify(productRepository, times(1)).findByNameContaining("Burger123");
+    }
+
+    @Test
+    @DisplayName("Should propagate repository exception")
+    void shouldPropagateRepositoryException() {
+        when(productRepository.findByNameContaining("Test"))
+                .thenThrow(new RuntimeException("Database error"));
+
+        assertThatThrownBy(() -> useCase.execute("Test"))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Database error");
+
+        verify(productRepository, times(1)).findByNameContaining("Test");
+    }
 }

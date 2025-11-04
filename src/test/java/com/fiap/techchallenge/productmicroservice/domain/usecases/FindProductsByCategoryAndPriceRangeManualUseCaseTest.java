@@ -20,13 +20,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class FindProductsByCategoryAndPriceRangeUseCaseTest {
+@DisplayName("FindProductsByCategoryAndPriceRangeManualUseCase Tests")
+class FindProductsByCategoryAndPriceRangeManualUseCaseTest {
 
     @Mock
     private ProductRepository productRepository;
 
     @InjectMocks
-    private FindProductsByCategoryAndPriceRangeUseCase useCase;
+    private FindProductsByCategoryAndPriceRangeManualUseCase useCase;
 
     private Product product1;
     private Product product2;
@@ -45,9 +46,9 @@ class FindProductsByCategoryAndPriceRangeUseCaseTest {
     }
 
     @Test
-    @DisplayName("Should find products by category and price range successfully")
-    void shouldFindProductsByCategoryAndPriceRange() {
-        when(productRepository.findByCategoryAndPriceBetween(
+    @DisplayName("Should find products by category and price range manually")
+    void shouldFindProductsByCategoryAndPriceRangeManually() {
+        when(productRepository.findByCategoryAndPriceRangeManual(
                 CategoryEnum.LANCHE, 1000L, 3000L))
                 .thenReturn(Arrays.asList(product1, product2));
 
@@ -58,13 +59,13 @@ class FindProductsByCategoryAndPriceRangeUseCaseTest {
         assertThat(result.get(0).getPrice()).isBetween(1000L, 3000L);
         assertThat(result.get(1).getPrice()).isBetween(1000L, 3000L);
         verify(productRepository, times(1))
-                .findByCategoryAndPriceBetween(CategoryEnum.LANCHE, 1000L, 3000L);
+                .findByCategoryAndPriceRangeManual(CategoryEnum.LANCHE, 1000L, 3000L);
     }
 
     @Test
     @DisplayName("Should return empty list when no products in price range")
     void shouldReturnEmptyListWhenNoProductsInPriceRange() {
-        when(productRepository.findByCategoryAndPriceBetween(
+        when(productRepository.findByCategoryAndPriceRangeManual(
                 CategoryEnum.LANCHE, 10000L, 20000L))
                 .thenReturn(Collections.emptyList());
 
@@ -73,7 +74,7 @@ class FindProductsByCategoryAndPriceRangeUseCaseTest {
         assertThat(result).isNotNull();
         assertThat(result).isEmpty();
         verify(productRepository, times(1))
-                .findByCategoryAndPriceBetween(CategoryEnum.LANCHE, 10000L, 20000L);
+                .findByCategoryAndPriceRangeManual(CategoryEnum.LANCHE, 10000L, 20000L);
     }
 
     @Test
@@ -83,7 +84,7 @@ class FindProductsByCategoryAndPriceRangeUseCaseTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Categoria é obrigatória");
 
-        verify(productRepository, never()).findByCategoryAndPriceBetween(any(), any(), any());
+        verify(productRepository, never()).findByCategoryAndPriceRangeManual(any(), any(), any());
     }
 
     @Test
@@ -93,7 +94,7 @@ class FindProductsByCategoryAndPriceRangeUseCaseTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Preço mínimo deve ser maior ou igual a zero");
 
-        verify(productRepository, never()).findByCategoryAndPriceBetween(any(), any(), any());
+        verify(productRepository, never()).findByCategoryAndPriceRangeManual(any(), any(), any());
     }
 
     @Test
@@ -103,7 +104,7 @@ class FindProductsByCategoryAndPriceRangeUseCaseTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Preço mínimo deve ser maior ou igual a zero");
 
-        verify(productRepository, never()).findByCategoryAndPriceBetween(any(), any(), any());
+        verify(productRepository, never()).findByCategoryAndPriceRangeManual(any(), any(), any());
     }
 
     @Test
@@ -113,7 +114,7 @@ class FindProductsByCategoryAndPriceRangeUseCaseTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Preço máximo deve ser maior que zero");
 
-        verify(productRepository, never()).findByCategoryAndPriceBetween(any(), any(), any());
+        verify(productRepository, never()).findByCategoryAndPriceRangeManual(any(), any(), any());
     }
 
     @Test
@@ -123,7 +124,7 @@ class FindProductsByCategoryAndPriceRangeUseCaseTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Preço máximo deve ser maior que zero");
 
-        verify(productRepository, never()).findByCategoryAndPriceBetween(any(), any(), any());
+        verify(productRepository, never()).findByCategoryAndPriceRangeManual(any(), any(), any());
     }
 
     @Test
@@ -133,13 +134,13 @@ class FindProductsByCategoryAndPriceRangeUseCaseTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Preço mínimo não pode ser maior que o preço máximo");
 
-        verify(productRepository, never()).findByCategoryAndPriceBetween(any(), any(), any());
+        verify(productRepository, never()).findByCategoryAndPriceRangeManual(any(), any(), any());
     }
 
     @Test
     @DisplayName("Should accept minPrice equal to zero")
     void shouldAcceptMinPriceEqualToZero() {
-        when(productRepository.findByCategoryAndPriceBetween(
+        when(productRepository.findByCategoryAndPriceRangeManual(
                 CategoryEnum.LANCHE, 0L, 3000L))
                 .thenReturn(Arrays.asList(product1, product2));
 
@@ -148,13 +149,13 @@ class FindProductsByCategoryAndPriceRangeUseCaseTest {
         assertThat(result).isNotNull();
         assertThat(result).hasSize(2);
         verify(productRepository, times(1))
-                .findByCategoryAndPriceBetween(CategoryEnum.LANCHE, 0L, 3000L);
+                .findByCategoryAndPriceRangeManual(CategoryEnum.LANCHE, 0L, 3000L);
     }
 
     @Test
     @DisplayName("Should accept minPrice equal to maxPrice")
     void shouldAcceptMinPriceEqualToMaxPrice() {
-        when(productRepository.findByCategoryAndPriceBetween(
+        when(productRepository.findByCategoryAndPriceRangeManual(
                 CategoryEnum.LANCHE, 2500L, 2500L))
                 .thenReturn(Collections.singletonList(product2));
 
@@ -163,16 +164,16 @@ class FindProductsByCategoryAndPriceRangeUseCaseTest {
         assertThat(result).isNotNull();
         assertThat(result).hasSize(1);
         verify(productRepository, times(1))
-                .findByCategoryAndPriceBetween(CategoryEnum.LANCHE, 2500L, 2500L);
+                .findByCategoryAndPriceRangeManual(CategoryEnum.LANCHE, 2500L, 2500L);
     }
 
     @Test
-    @DisplayName("Should handle different categories in price range search")
-    void shouldHandleDifferentCategoriesInPriceRangeSearch() {
+    @DisplayName("Should handle different categories")
+    void shouldHandleDifferentCategories() {
         CategoryEnum[] categories = {CategoryEnum.LANCHE, CategoryEnum.BEBIDA, CategoryEnum.ACOMPANHAMENTO, CategoryEnum.SOBREMESA};
         
         for (CategoryEnum category : categories) {
-            when(productRepository.findByCategoryAndPriceBetween(category, 1000L, 3000L))
+            when(productRepository.findByCategoryAndPriceRangeManual(category, 1000L, 3000L))
                     .thenReturn(Collections.singletonList(product1));
             
             List<Product> result = useCase.execute(category, 1000L, 3000L);
@@ -181,13 +182,13 @@ class FindProductsByCategoryAndPriceRangeUseCaseTest {
             assertThat(result).hasSize(1);
         }
         
-        verify(productRepository, times(4)).findByCategoryAndPriceBetween(any(CategoryEnum.class), eq(1000L), eq(3000L));
+        verify(productRepository, times(4)).findByCategoryAndPriceRangeManual(any(CategoryEnum.class), eq(1000L), eq(3000L));
     }
 
     @Test
     @DisplayName("Should handle large price range")
     void shouldHandleLargePriceRange() {
-        when(productRepository.findByCategoryAndPriceBetween(
+        when(productRepository.findByCategoryAndPriceRangeManual(
                 CategoryEnum.LANCHE, 0L, 999999L))
                 .thenReturn(Arrays.asList(product1, product2, product3));
 
@@ -196,13 +197,13 @@ class FindProductsByCategoryAndPriceRangeUseCaseTest {
         assertThat(result).isNotNull();
         assertThat(result).hasSize(3);
         verify(productRepository, times(1))
-                .findByCategoryAndPriceBetween(CategoryEnum.LANCHE, 0L, 999999L);
+                .findByCategoryAndPriceRangeManual(CategoryEnum.LANCHE, 0L, 999999L);
     }
 
     @Test
     @DisplayName("Should propagate repository exception")
     void shouldPropagateRepositoryException() {
-        when(productRepository.findByCategoryAndPriceBetween(
+        when(productRepository.findByCategoryAndPriceRangeManual(
                 CategoryEnum.LANCHE, 1000L, 3000L))
                 .thenThrow(new RuntimeException("Database error"));
 
@@ -211,6 +212,23 @@ class FindProductsByCategoryAndPriceRangeUseCaseTest {
                 .hasMessage("Database error");
 
         verify(productRepository, times(1))
-                .findByCategoryAndPriceBetween(CategoryEnum.LANCHE, 1000L, 3000L);
+                .findByCategoryAndPriceRangeManual(CategoryEnum.LANCHE, 1000L, 3000L);
+    }
+
+    @Test
+    @DisplayName("Should find products with exact price boundaries")
+    void shouldFindProductsWithExactPriceBoundaries() {
+        when(productRepository.findByCategoryAndPriceRangeManual(
+                CategoryEnum.LANCHE, 1500L, 4500L))
+                .thenReturn(Arrays.asList(product1, product2, product3));
+
+        List<Product> result = useCase.execute(CategoryEnum.LANCHE, 1500L, 4500L);
+
+        assertThat(result).isNotNull();
+        assertThat(result).hasSize(3);
+        assertThat(result).extracting(Product::getPrice)
+                .containsExactlyInAnyOrder(1500L, 2500L, 4500L);
+        verify(productRepository, times(1))
+                .findByCategoryAndPriceRangeManual(CategoryEnum.LANCHE, 1500L, 4500L);
     }
 }
