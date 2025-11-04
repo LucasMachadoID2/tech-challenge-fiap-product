@@ -1,10 +1,10 @@
 package com.fiap.techchallenge.productmicroservice.infrastructure.persistence;
 
+import com.fiap.techchallenge.productmicroservice.domain.entities.CategoryEnum;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.index.Indexed;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Document(collection = "products")
@@ -17,16 +17,17 @@ public class ProductDocument {
     
     private String description;
     
-    @Indexed
-    private BigDecimal price;
+    private String image;
     
     @Indexed
-    private String category;
+    private Long price;
+    
+    private Long priceForClient;
     
     @Indexed
-    private boolean onPromotion;
+    private CategoryEnum category;
     
-    private BigDecimal promotionPrice;
+    private Long quantity;
     
     @Indexed
     private LocalDateTime createdAt;
@@ -35,15 +36,16 @@ public class ProductDocument {
 
     public ProductDocument() {}
 
-    public ProductDocument(String name, String description, BigDecimal price, String category, 
-                          boolean onPromotion, BigDecimal promotionPrice, 
+    public ProductDocument(String name, String description, String image, Long price, 
+                          Long priceForClient, CategoryEnum category, Long quantity,
                           LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.name = name;
         this.description = description;
+        this.image = image;
         this.price = price;
+        this.priceForClient = priceForClient;
         this.category = category;
-        this.onPromotion = onPromotion;
-        this.promotionPrice = promotionPrice;
+        this.quantity = quantity;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -72,36 +74,44 @@ public class ProductDocument {
         this.description = description;
     }
 
-    public BigDecimal getPrice() {
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public Long getPrice() {
         return price;
     }
 
-    public void setPrice(BigDecimal price) {
+    public void setPrice(Long price) {
         this.price = price;
     }
 
-    public String getCategory() {
+    public Long getPriceForClient() {
+        return priceForClient;
+    }
+
+    public void setPriceForClient(Long priceForClient) {
+        this.priceForClient = priceForClient;
+    }
+
+    public CategoryEnum getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(CategoryEnum category) {
         this.category = category;
     }
 
-    public boolean isOnPromotion() {
-        return onPromotion;
+    public Long getQuantity() {
+        return quantity;
     }
 
-    public void setOnPromotion(boolean onPromotion) {
-        this.onPromotion = onPromotion;
-    }
-
-    public BigDecimal getPromotionPrice() {
-        return promotionPrice;
-    }
-
-    public void setPromotionPrice(BigDecimal promotionPrice) {
-        this.promotionPrice = promotionPrice;
+    public void setQuantity(Long quantity) {
+        this.quantity = quantity;
     }
 
     public LocalDateTime getCreatedAt() {

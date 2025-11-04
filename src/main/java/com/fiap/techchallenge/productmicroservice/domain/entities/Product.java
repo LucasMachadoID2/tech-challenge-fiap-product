@@ -1,6 +1,5 @@
 package com.fiap.techchallenge.productmicroservice.domain.entities;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -8,91 +7,74 @@ public class Product {
     private static final String REQUIRED_NAME_MESSAGE = "Nome do produto é obrigatório";
     private static final String REQUIRED_CATEGORY_MESSAGE = "Categoria é obrigatória";
     private static final String INVALID_PRICE_MESSAGE = "Preço deve ser maior que zero";
-    private static final String INVALID_PROMOTION_PRICE_MESSAGE = "Preço promocional deve ser menor que o preço normal";
+    private static final String INVALID_QUANTITY_MESSAGE = "Quantidade não pode ser negativa";
 
     private String id;
     private String name;
     private String description;
-    private BigDecimal price;
-    private String category;
-    private boolean onPromotion;
-    private BigDecimal promotionPrice;
+    private String image;
+    private Long price;
+    private Long priceForClient;
+    private CategoryEnum category;
+    private Long quantity;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     public Product() {
     }
 
-    public Product(String name, String description, BigDecimal price, String category) {
+    public Product(String name, String description, String image, Long price, 
+                   Long priceForClient, CategoryEnum category, Long quantity) {
         validateRequiredFields(name, price, category);
+        validateQuantity(quantity);
         this.name = name.trim();
         this.description = description != null ? description.trim() : "";
+        this.image = image;
         this.price = price;
-        this.category = category.trim();
-        this.onPromotion = false;
+        this.priceForClient = priceForClient;
+        this.category = category;
+        this.quantity = quantity != null ? quantity : 0L;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
 
-    public Product(String id, String name, String description, BigDecimal price, String category, 
-                   boolean onPromotion, BigDecimal promotionPrice) {
-        this(name, description, price, category);
+    public Product(String id, String name, String description, String image, 
+                   Long price, Long priceForClient, CategoryEnum category, Long quantity) {
+        this(name, description, image, price, priceForClient, category, quantity);
         this.id = id;
-        if (onPromotion && promotionPrice != null) {
-            applyPromotion(promotionPrice);
-        }
     }
 
-    public BigDecimal getEffectivePrice() {
-        return isValidPromotion() ? promotionPrice : price;
-    }
-
-    public void applyPromotion(BigDecimal promotionPrice) {
-        validatePromotionPrice(promotionPrice);
-        this.promotionPrice = promotionPrice;
-        this.onPromotion = true;
-        updateTimestamp();
-    }
-
-    public void removePromotion() {
-        this.onPromotion = false;
-        this.promotionPrice = null;
-        updateTimestamp();
-    }
-
-    public void updatePrice(BigDecimal newPrice) {
+    public void updatePrice(Long newPrice) {
         validatePrice(newPrice);
         this.price = newPrice;
-        
-        if (isValidPromotion() && newPrice.compareTo(promotionPrice) <= 0) {
-            removePromotion();
-        }
         updateTimestamp();
     }
 
-    public boolean isValidPromotion() {
-        return onPromotion && promotionPrice != null && promotionPrice.compareTo(price) < 0;
+    public void updateQuantity(Long newQuantity) {
+        validateQuantity(newQuantity);
+        this.quantity = newQuantity;
+        updateTimestamp();
     }
 
-    private void validateRequiredFields(String name, BigDecimal price, String category) {
+    private void validateRequiredFields(String name, Long price, CategoryEnum category) {
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException(REQUIRED_NAME_MESSAGE);
         }
         validatePrice(price);
-        if (category == null || category.trim().isEmpty()) {
+        if (category == null) {
             throw new IllegalArgumentException(REQUIRED_CATEGORY_MESSAGE);
         }
     }
 
-    private void validatePrice(BigDecimal price) {
-        if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
+    private void validatePrice(Long price) {
+        if (price == null || price <= 0) {
             throw new IllegalArgumentException(INVALID_PRICE_MESSAGE);
         }
     }
 
-    private void validatePromotionPrice(BigDecimal promotionPrice) {
-        if (promotionPrice == null || promotionPrice.compareTo(this.price) >= 0) {
-            throw new IllegalArgumentException(INVALID_PROMOTION_PRICE_MESSAGE);
+    private void validateQuantity(Long quantity) {
+        if (quantity != null && quantity < 0) {
+            throw new IllegalArgumentException(INVALID_QUANTITY_MESSAGE);
         }
     }
 
@@ -129,45 +111,50 @@ public class Product {
         updateTimestamp();
     }
 
-    public BigDecimal getPrice() {
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+        updateTimestamp();
+    }
+
+    public Long getPrice() {
         return price;
     }
 
-    public void setPrice(BigDecimal price) {
+    public void setPrice(Long price) {
         updatePrice(price);
     }
 
-    public String getCategory() {
+    public Long getPriceForClient() {
+        return priceForClient;
+    }
+
+    public void setPriceForClient(Long priceForClient) {
+        this.priceForClient = priceForClient;
+        updateTimestamp();
+    }
+
+    public CategoryEnum getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
-        if (category == null || category.trim().isEmpty()) {
+    public void setCategory(CategoryEnum category) {
+        if (category == null) {
             throw new IllegalArgumentException(REQUIRED_CATEGORY_MESSAGE);
         }
-        this.category = category.trim();
+        this.category = category;
         updateTimestamp();
     }
 
-    public boolean isOnPromotion() {
-        return onPromotion;
+    public Long getQuantity() {
+        return quantity;
     }
 
-    public void setOnPromotion(boolean onPromotion) {
-        this.onPromotion = onPromotion;
-        updateTimestamp();
-    }
-
-    public BigDecimal getPromotionPrice() {
-        return promotionPrice;
-    }
-
-    public void setPromotionPrice(BigDecimal promotionPrice) {
-        if (promotionPrice != null) {
-            applyPromotion(promotionPrice);
-        } else {
-            removePromotion();
-        }
+    public void setQuantity(Long quantity) {
+        updateQuantity(quantity);
     }
 
     public LocalDateTime getCreatedAt() {
@@ -204,10 +191,10 @@ public class Product {
         return "Product{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
-                ", category='" + category + '\'' +
+                ", category=" + category +
                 ", price=" + price +
-                ", effectivePrice=" + getEffectivePrice() +
-                ", onPromotion=" + onPromotion +
+                ", priceForClient=" + priceForClient +
+                ", quantity=" + quantity +
                 '}';
     }
 }

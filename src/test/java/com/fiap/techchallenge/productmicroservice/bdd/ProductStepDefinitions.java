@@ -6,12 +6,12 @@ import io.cucumber.java.en.When;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.And;
 import com.fiap.techchallenge.productmicroservice.application.dto.ProductResponseDTO;
+import com.fiap.techchallenge.productmicroservice.domain.entities.CategoryEnum;
 import com.fiap.techchallenge.productmicroservice.domain.entities.Product;
 import com.fiap.techchallenge.productmicroservice.domain.repositories.ProductRepository;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -56,18 +56,12 @@ public class ProductStepDefinitions {
             new ArrayList<>(inMemoryDatabase.values())
         );
 
-        when(productRepository.findByCategory(anyString())).thenAnswer(invocation -> {
-            String category = invocation.getArgument(0);
+        when(productRepository.findByCategory(any(CategoryEnum.class))).thenAnswer(invocation -> {
+            CategoryEnum category = invocation.getArgument(0);
             return inMemoryDatabase.values().stream()
                 .filter(p -> p.getCategory().equals(category))
                 .collect(Collectors.toList());
         });
-
-        when(productRepository.findByOnPromotion(true)).thenAnswer(invocation ->
-            inMemoryDatabase.values().stream()
-                .filter(Product::isOnPromotion)
-                .collect(Collectors.toList())
-        );
 
         when(productRepository.findByNameContaining(anyString())).thenAnswer(invocation -> {
             String name = invocation.getArgument(0);
@@ -97,8 +91,11 @@ public class ProductStepDefinitions {
         Product product = new Product();
         product.setName(data.get("name"));
         product.setDescription(data.get("description"));
-        product.setPrice(new BigDecimal(data.get("price")));
-        product.setCategory(data.get("category"));
+        product.setImage(data.getOrDefault("image", "http://default-image.url"));
+        product.setPrice(Long.parseLong(data.get("price").replace(".", "")));
+        product.setPriceForClient(Long.parseLong(data.getOrDefault("priceForClient", data.get("price")).replace(".", "")));
+        product.setCategory(CategoryEnum.valueOf(data.get("category")));
+        product.setQuantity(Long.parseLong(data.getOrDefault("quantity", "0")));
         
         Product saved = productRepository.save(product);
         createdProduct = convertToDTO(saved);
@@ -117,9 +114,9 @@ public class ProductStepDefinitions {
 
     @And("the product should have the price of {double}")
     public void theProductShouldHaveThePriceOf(double price) {
-        BigDecimal expected = BigDecimal.valueOf(price);
-        BigDecimal actual = createdProduct.getPrice();
-        assertEquals(0, expected.compareTo(actual), 
+        long expected = (long)(price * 100);
+        Long actual = createdProduct.getPrice();
+        assertEquals(expected, actual, 
             "Expected price: " + expected + ", but was: " + actual);
     }
 
@@ -128,8 +125,11 @@ public class ProductStepDefinitions {
         Product product = new Product();
         product.setName("Test Product");
         product.setDescription("Test product description");
-        product.setPrice(new BigDecimal("15.50"));
-        product.setCategory("LANCHE");
+        product.setImage("http://image.url");
+        product.setPrice(1550L);
+        product.setPriceForClient(1200L);
+        product.setCategory(CategoryEnum.LANCHE);
+        product.setQuantity(10L);
         
         Product saved = productRepository.save(product);
         productId = saved.getId();
@@ -153,8 +153,8 @@ public class ProductStepDefinitions {
     public void theProductShouldHaveAllCorrectData() {
         assertEquals("Test Product", createdProduct.getName());
         assertEquals("Test product description", createdProduct.getDescription());
-        assertEquals(0, new BigDecimal("15.50").compareTo(createdProduct.getPrice()));
-        assertEquals("LANCHE", createdProduct.getCategory());
+        assertEquals(1550L, createdProduct.getPrice());
+        assertEquals(CategoryEnum.LANCHE, createdProduct.getCategory());
     }
 
     @Given("there are {int} registered products")
@@ -163,8 +163,11 @@ public class ProductStepDefinitions {
             Product product = new Product();
             product.setName("Product " + i);
             product.setDescription("Description " + i);
-            product.setPrice(BigDecimal.valueOf(10 * i));
-            product.setCategory("LANCHE");
+            product.setImage("http://image" + i + ".url");
+            product.setPrice((long)(10 * i * 100));
+            product.setPriceForClient((long)(8 * i * 100));
+            product.setCategory(CategoryEnum.LANCHE);
+            product.setQuantity(10L);
             productRepository.save(product);
         }
     }
@@ -188,21 +191,27 @@ public class ProductStepDefinitions {
         Product product1 = new Product();
         product1.setName("Product " + category1);
         product1.setDescription("Description");
-        product1.setPrice(new BigDecimal("20.00"));
-        product1.setCategory(category1);
+        product1.setImage("http://image1.url");
+        product1.setPrice(2000L);
+        product1.setPriceForClient(1800L);
+        product1.setCategory(CategoryEnum.valueOf(category1));
+        product1.setQuantity(5L);
         productRepository.save(product1);
 
         Product product2 = new Product();
         product2.setName("Product " + category2);
         product2.setDescription("Description");
-        product2.setPrice(new BigDecimal("15.00"));
-        product2.setCategory(category2);
+        product2.setImage("http://image2.url");
+        product2.setPrice(1500L);
+        product2.setPriceForClient(1300L);
+        product2.setCategory(CategoryEnum.valueOf(category2));
+        product2.setQuantity(8L);
         productRepository.save(product2);
     }
 
     @When("I search for products in category {string}")
     public void iSearchForProductsInCategory(String category) {
-        List<Product> products = productRepository.findByCategory(category);
+        List<Product> products = productRepository.findByCategory(CategoryEnum.valueOf(category));
         productList = products.stream()
             .map(this::convertToDTO)
             .collect(Collectors.toList());
@@ -212,41 +221,8 @@ public class ProductStepDefinitions {
     public void iShouldReceiveOnlyProductsFromCategory(String category) {
         assertNotNull(productList);
         assertFalse(productList.isEmpty());
-        productList.forEach(product -> assertEquals(category, product.getCategory()));
-    }
-
-    @Given("there are products on promotion and without promotion")
-    public void thereAreProductsOnPromotionAndWithoutPromotion() {
-        Product onPromotion = new Product();
-        onPromotion.setName("Product on Promotion");
-        onPromotion.setDescription("Description");
-        onPromotion.setPrice(new BigDecimal("50.00"));
-        onPromotion.setCategory("LANCHE");
-        onPromotion.setOnPromotion(true);
-        onPromotion.setPromotionPrice(new BigDecimal("35.00"));
-        productRepository.save(onPromotion);
-
-        Product notOnPromotion = new Product();
-        notOnPromotion.setName("Regular Product");
-        notOnPromotion.setDescription("Description");
-        notOnPromotion.setPrice(new BigDecimal("30.00"));
-        notOnPromotion.setCategory("LANCHE");
-        productRepository.save(notOnPromotion);
-    }
-
-    @When("I search for products on promotion")
-    public void iSearchForProductsOnPromotion() {
-        List<Product> products = productRepository.findByOnPromotion(true);
-        productList = products.stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
-    }
-
-    @Then("I should receive only products on promotion")
-    public void iShouldReceiveOnlyProductsOnPromotion() {
-        assertNotNull(productList);
-        assertFalse(productList.isEmpty());
-        productList.forEach(product -> assertTrue(product.isOnPromotion()));
+        CategoryEnum expectedCategory = CategoryEnum.valueOf(category);
+        productList.forEach(product -> assertEquals(expectedCategory, product.getCategory()));
     }
 
     @Given("there is a product with name {string}")
@@ -254,8 +230,11 @@ public class ProductStepDefinitions {
         Product product = new Product();
         product.setName(name);
         product.setDescription("Description");
-        product.setPrice(new BigDecimal("25.00"));
-        product.setCategory("LANCHE");
+        product.setImage("http://image.url");
+        product.setPrice(2500L);
+        product.setPriceForClient(2000L);
+        product.setCategory(CategoryEnum.LANCHE);
+        product.setQuantity(10L);
         productRepository.save(product);
     }
 
@@ -278,35 +257,47 @@ public class ProductStepDefinitions {
 
     @Given("there are products in category {string} with varied prices")
     public void thereAreProductsInCategoryWithVariedPrices(String category) {
+        CategoryEnum cat = CategoryEnum.valueOf(category);
+        
         Product product1 = new Product();
         product1.setName("Cheap Product");
         product1.setDescription("Description");
-        product1.setPrice(new BigDecimal("15.00"));
-        product1.setCategory(category);
+        product1.setImage("http://image1.url");
+        product1.setPrice(1500L);
+        product1.setPriceForClient(1200L);
+        product1.setCategory(cat);
+        product1.setQuantity(10L);
         productRepository.save(product1);
 
         Product product2 = new Product();
         product2.setName("Medium Product");
         product2.setDescription("Description");
-        product2.setPrice(new BigDecimal("25.00"));
-        product2.setCategory(category);
+        product2.setImage("http://image2.url");
+        product2.setPrice(2500L);
+        product2.setPriceForClient(2000L);
+        product2.setCategory(cat);
+        product2.setQuantity(15L);
         productRepository.save(product2);
 
         Product product3 = new Product();
         product3.setName("Expensive Product");
         product3.setDescription("Description");
-        product3.setPrice(new BigDecimal("50.00"));
-        product3.setCategory(category);
+        product3.setImage("http://image3.url");
+        product3.setPrice(5000L);
+        product3.setPriceForClient(4500L);
+        product3.setCategory(cat);
+        product3.setQuantity(5L);
         productRepository.save(product3);
     }
 
     @When("I search for products in category {string} between {double} and {double}")
     public void iSearchForProductsInCategoryBetween(String category, double min, double max) {
-        BigDecimal minPrice = BigDecimal.valueOf(min);
-        BigDecimal maxPrice = BigDecimal.valueOf(max);
+        long minPrice = (long)(min * 100);
+        long maxPrice = (long)(max * 100);
+        CategoryEnum cat = CategoryEnum.valueOf(category);
         
-        List<Product> products = productRepository.findByCategory(category).stream()
-            .filter(p -> p.getPrice().compareTo(minPrice) >= 0 && p.getPrice().compareTo(maxPrice) <= 0)
+        List<Product> products = productRepository.findByCategory(cat).stream()
+            .filter(p -> p.getPrice() >= minPrice && p.getPrice() <= maxPrice)
             .collect(Collectors.toList());
         
         productList = products.stream()
@@ -337,10 +328,11 @@ public class ProductStepDefinitions {
             Product product = new Product();
             product.setName("Invalid Product");
             product.setDescription("Description");
-            product.setPrice(new BigDecimal("-10.00"));
-            product.setCategory("LANCHE");
+            product.setImage("http://image.url");
+            product.setPrice(-1000L);
+            product.setCategory(CategoryEnum.LANCHE);
             
-            if (product.getPrice().compareTo(BigDecimal.ZERO) < 0) {
+            if (product.getPrice() < 0) {
                 throw new IllegalArgumentException("Price cannot be negative");
             }
             productRepository.save(product);
@@ -354,58 +346,18 @@ public class ProductStepDefinitions {
         assertNotNull(thrownException);
     }
 
-    @Given("there is a product with price of {double}")
-    public void thereIsAProductWithPriceOf(double price) {
-        Product product = new Product();
-        product.setName("Product for Promotion");
-        product.setDescription("Description");
-        product.setPrice(BigDecimal.valueOf(price));
-        product.setCategory("LANCHE");
-        Product saved = productRepository.save(product);
-        productId = saved.getId();
-        createdProduct = convertToDTO(saved);
-    }
-
-    @When("I apply a promotion of {double}")
-    public void iApplyAPromotionOf(double promotionPrice) {
-        Optional<Product> productOpt = productRepository.findById(productId);
-        if (productOpt.isPresent()) {
-            Product product = productOpt.get();
-            product.setOnPromotion(true);
-            product.setPromotionPrice(BigDecimal.valueOf(promotionPrice));
-            Product saved = productRepository.save(product);
-            createdProduct = convertToDTO(saved);
-        }
-    }
-
-    @Then("the effective price should be {double}")
-    public void theEffectivePriceShouldBe(double effectivePrice) {
-        BigDecimal expected = BigDecimal.valueOf(effectivePrice);
-        BigDecimal actual = createdProduct.getEffectivePrice();
-        
-        assertEquals(0, expected.compareTo(actual),
-            "Expected effective price: " + expected + ", but was: " + actual);
-    }
-
-    @And("the product should be marked as on promotion")
-    public void theProductShouldBeMarkedAsOnPromotion() {
-        assertTrue(createdProduct.isOnPromotion());
-    }
-
     private ProductResponseDTO convertToDTO(Product product) {
         ProductResponseDTO dto = new ProductResponseDTO();
         dto.setId(product.getId());
         dto.setName(product.getName());
         dto.setDescription(product.getDescription());
+        dto.setImage(product.getImage());
         dto.setPrice(product.getPrice());
+        dto.setPriceForClient(product.getPriceForClient());
         dto.setCategory(product.getCategory());
-        dto.setOnPromotion(product.isOnPromotion());
-        dto.setPromotionPrice(product.getPromotionPrice());
-        
-        BigDecimal effectivePrice = product.isOnPromotion() && product.getPromotionPrice() != null 
-            ? product.getPromotionPrice() 
-            : product.getPrice();
-        dto.setEffectivePrice(effectivePrice);
+        dto.setQuantity(product.getQuantity());
+        dto.setCreatedAt(product.getCreatedAt());
+        dto.setUpdatedAt(product.getUpdatedAt());
         
         return dto;
     }

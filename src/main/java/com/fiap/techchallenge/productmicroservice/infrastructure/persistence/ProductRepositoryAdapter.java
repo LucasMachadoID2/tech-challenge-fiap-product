@@ -1,11 +1,11 @@
 package com.fiap.techchallenge.productmicroservice.infrastructure.persistence;
 
+import com.fiap.techchallenge.productmicroservice.domain.entities.CategoryEnum;
 import com.fiap.techchallenge.productmicroservice.domain.entities.Product;
 import com.fiap.techchallenge.productmicroservice.domain.repositories.ProductRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -47,16 +47,8 @@ public class ProductRepositoryAdapter implements ProductRepository {
     }
 
     @Override
-    public List<Product> findByCategory(String category) {
+    public List<Product> findByCategory(CategoryEnum category) {
         return productMongoRepository.findByCategory(category)
-                .stream()
-                .map(document -> modelMapper.map(document, Product.class))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Product> findByOnPromotion(boolean onPromotion) {
-        return productMongoRepository.findByOnPromotion(onPromotion)
                 .stream()
                 .map(document -> modelMapper.map(document, Product.class))
                 .collect(Collectors.toList());
@@ -71,7 +63,7 @@ public class ProductRepositoryAdapter implements ProductRepository {
     }
 
     @Override
-    public List<Product> findByCategoryAndPriceBetween(String category, BigDecimal minPrice, BigDecimal maxPrice) {
+    public List<Product> findByCategoryAndPriceBetween(CategoryEnum category, Long minPrice, Long maxPrice) {
         return productMongoRepository.findByCategoryAndPriceBetween(category, minPrice, maxPrice)
                 .stream()
                 .map(document -> modelMapper.map(document, Product.class))
@@ -79,7 +71,7 @@ public class ProductRepositoryAdapter implements ProductRepository {
     }
 
     @Override
-    public List<Product> findByCategoryAndPriceRangeManual(String category, BigDecimal minPrice, BigDecimal maxPrice) {
+    public List<Product> findByCategoryAndPriceRangeManual(CategoryEnum category, Long minPrice, Long maxPrice) {
         return productMongoRepository.findByCategoryAndPriceRangeManual(category, minPrice, maxPrice)
                 .stream()
                 .map(document -> modelMapper.map(document, Product.class))

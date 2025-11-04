@@ -33,11 +33,6 @@ Feature: Product Management
     When I search for products in category "LANCHE"
     Then I should receive only products from category "LANCHE"
 
-  Scenario: Search products on promotion
-    Given there are products on promotion and without promotion
-    When I search for products on promotion
-    Then I should receive only products on promotion
-
   Scenario: Search products by name
     Given there is a product with name "Margherita Pizza"
     When I search for products with name "Pizza"
@@ -56,9 +51,3 @@ Feature: Product Management
   Scenario: Creating product with invalid price should fail
     When I try to create a product with invalid price
     Then it should return a validation error
-
-  Scenario: Apply promotion to a product
-    Given there is a product with price of 50.00
-    When I apply a promotion of 35.00
-    Then the effective price should be 35.00
-    And the product should be marked as on promotion

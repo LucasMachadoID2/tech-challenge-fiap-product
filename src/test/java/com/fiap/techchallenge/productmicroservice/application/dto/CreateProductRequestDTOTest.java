@@ -1,9 +1,8 @@
 package com.fiap.techchallenge.productmicroservice.application.dto;
 
+import com.fiap.techchallenge.productmicroservice.domain.entities.CategoryEnum;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,7 +14,8 @@ class CreateProductRequestDTOTest {
         CreateProductRequestDTO dto = new CreateProductRequestDTO();
 
         assertThat(dto).isNotNull();
-        assertThat(dto.isOnPromotion()).isFalse();
+        assertThat(dto.getName()).isNull();
+        assertThat(dto.getCategory()).isNull();
     }
 
     @Test
@@ -24,14 +24,20 @@ class CreateProductRequestDTOTest {
         CreateProductRequestDTO dto = new CreateProductRequestDTO(
                 "Test Product",
                 "Test Description",
-                new BigDecimal("25.90"),
-                "LANCHE"
+                "http://image.url",
+                2590L,
+                2000L,
+                CategoryEnum.LANCHE,
+                10L
         );
 
         assertThat(dto.getName()).isEqualTo("Test Product");
         assertThat(dto.getDescription()).isEqualTo("Test Description");
-        assertThat(dto.getPrice()).isEqualByComparingTo(new BigDecimal("25.90"));
-        assertThat(dto.getCategory()).isEqualTo("LANCHE");
+        assertThat(dto.getImage()).isEqualTo("http://image.url");
+        assertThat(dto.getPrice()).isEqualTo(2590L);
+        assertThat(dto.getPriceForClient()).isEqualTo(2000L);
+        assertThat(dto.getCategory()).isEqualTo(CategoryEnum.LANCHE);
+        assertThat(dto.getQuantity()).isEqualTo(10L);
     }
 
     @Test
@@ -41,51 +47,54 @@ class CreateProductRequestDTOTest {
 
         dto.setName("Product Name");
         dto.setDescription("Product Description");
-        dto.setPrice(new BigDecimal("50.00"));
-        dto.setCategory("BEBIDA");
-        dto.setOnPromotion(true);
-        dto.setPromotionPrice(new BigDecimal("40.00"));
+        dto.setImage("http://image.url");
+        dto.setPrice(5000L);
+        dto.setPriceForClient(4500L);
+        dto.setCategory(CategoryEnum.BEBIDA);
+        dto.setQuantity(20L);
 
         assertThat(dto.getName()).isEqualTo("Product Name");
         assertThat(dto.getDescription()).isEqualTo("Product Description");
-        assertThat(dto.getPrice()).isEqualByComparingTo(new BigDecimal("50.00"));
-        assertThat(dto.getCategory()).isEqualTo("BEBIDA");
-        assertThat(dto.isOnPromotion()).isTrue();
-        assertThat(dto.getPromotionPrice()).isEqualByComparingTo(new BigDecimal("40.00"));
+        assertThat(dto.getImage()).isEqualTo("http://image.url");
+        assertThat(dto.getPrice()).isEqualTo(5000L);
+        assertThat(dto.getPriceForClient()).isEqualTo(4500L);
+        assertThat(dto.getCategory()).isEqualTo(CategoryEnum.BEBIDA);
+        assertThat(dto.getQuantity()).isEqualTo(20L);
     }
 
     @Test
-    @DisplayName("Should handle null promotion price")
-    void shouldHandleNullPromotionPrice() {
-        CreateProductRequestDTO dto = new CreateProductRequestDTO();
-        dto.setPromotionPrice(null);
-
-        assertThat(dto.getPromotionPrice()).isNull();
-    }
-
-    @Test
-    @DisplayName("Should handle null description")
-    void shouldHandleNullDescription() {
+    @DisplayName("Should handle null optional fields")
+    void shouldHandleNullOptionalFields() {
         CreateProductRequestDTO dto = new CreateProductRequestDTO();
         dto.setDescription(null);
+        dto.setImage(null);
+        dto.setPriceForClient(null);
+        dto.setQuantity(null);
 
         assertThat(dto.getDescription()).isNull();
+        assertThat(dto.getImage()).isNull();
+        assertThat(dto.getPriceForClient()).isNull();
+        assertThat(dto.getQuantity()).isNull();
     }
 
     @Test
-    @DisplayName("Should set onPromotion to false by default")
-    void shouldSetOnPromotionToFalseByDefault() {
+    @DisplayName("Should set category enum correctly")
+    void shouldSetCategoryEnumCorrectly() {
         CreateProductRequestDTO dto = new CreateProductRequestDTO();
-
-        assertThat(dto.isOnPromotion()).isFalse();
+        
+        dto.setCategory(CategoryEnum.LANCHE);
+        assertThat(dto.getCategory()).isEqualTo(CategoryEnum.LANCHE);
+        
+        dto.setCategory(CategoryEnum.SOBREMESA);
+        assertThat(dto.getCategory()).isEqualTo(CategoryEnum.SOBREMESA);
     }
 
     @Test
-    @DisplayName("Should allow setting onPromotion to true")
-    void shouldAllowSettingOnPromotionToTrue() {
+    @DisplayName("Should handle zero quantity")
+    void shouldHandleZeroQuantity() {
         CreateProductRequestDTO dto = new CreateProductRequestDTO();
-        dto.setOnPromotion(true);
+        dto.setQuantity(0L);
 
-        assertThat(dto.isOnPromotion()).isTrue();
+        assertThat(dto.getQuantity()).isEqualTo(0L);
     }
 }

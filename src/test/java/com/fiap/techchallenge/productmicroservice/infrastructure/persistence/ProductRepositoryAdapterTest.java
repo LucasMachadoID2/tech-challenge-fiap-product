@@ -1,5 +1,6 @@
 package com.fiap.techchallenge.productmicroservice.infrastructure.persistence;
 
+import com.fiap.techchallenge.productmicroservice.domain.entities.CategoryEnum;
 import com.fiap.techchallenge.productmicroservice.domain.entities.Product;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -10,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -38,16 +38,18 @@ class ProductRepositoryAdapterTest {
 
     @BeforeEach
     void setUp() {
-        product = new Product("Test Product", "Description", new BigDecimal("25.90"), "LANCHE");
+        product = new Product("Test Product", "Description", "image.url", 2590L, 2000L, CategoryEnum.LANCHE, 10L);
         product.setId("1");
 
         productDocument = new ProductDocument();
         productDocument.setId("1");
         productDocument.setName("Test Product");
         productDocument.setDescription("Description");
-        productDocument.setPrice(new BigDecimal("25.90"));
-        productDocument.setCategory("LANCHE");
-        productDocument.setOnPromotion(false);
+        productDocument.setImage("image.url");
+        productDocument.setPrice(2590L);
+        productDocument.setPriceForClient(2000L);
+        productDocument.setCategory(CategoryEnum.LANCHE);
+        productDocument.setQuantity(10L);
         productDocument.setCreatedAt(LocalDateTime.now());
         productDocument.setUpdatedAt(LocalDateTime.now());
     }
@@ -118,29 +120,14 @@ class ProductRepositoryAdapterTest {
     @DisplayName("Should find products by category successfully")
     void shouldFindProductsByCategorySuccessfully() {
         List<ProductDocument> documents = Arrays.asList(productDocument);
-        when(productMongoRepository.findByCategory("LANCHE")).thenReturn(documents);
+        when(productMongoRepository.findByCategory(CategoryEnum.LANCHE)).thenReturn(documents);
         when(modelMapper.map(productDocument, Product.class)).thenReturn(product);
 
-        List<Product> products = productRepositoryAdapter.findByCategory("LANCHE");
+        List<Product> products = productRepositoryAdapter.findByCategory(CategoryEnum.LANCHE);
 
         assertThat(products).hasSize(1);
-        assertThat(products.get(0).getCategory()).isEqualTo("LANCHE");
-        verify(productMongoRepository, times(1)).findByCategory("LANCHE");
-    }
-
-    @Test
-    @DisplayName("Should find products on promotion successfully")
-    void shouldFindProductsOnPromotionSuccessfully() {
-        productDocument.setOnPromotion(true);
-        productDocument.setPromotionPrice(new BigDecimal("19.90"));
-        List<ProductDocument> documents = Arrays.asList(productDocument);
-        when(productMongoRepository.findByOnPromotion(true)).thenReturn(documents);
-        when(modelMapper.map(productDocument, Product.class)).thenReturn(product);
-
-        List<Product> products = productRepositoryAdapter.findByOnPromotion(true);
-
-        assertThat(products).hasSize(1);
-        verify(productMongoRepository, times(1)).findByOnPromotion(true);
+        assertThat(products.get(0).getCategory()).isEqualTo(CategoryEnum.LANCHE);
+        verify(productMongoRepository, times(1)).findByCategory(CategoryEnum.LANCHE);
     }
 
     @Test
@@ -161,36 +148,17 @@ class ProductRepositoryAdapterTest {
     @DisplayName("Should find products by category and price between successfully")
     void shouldFindProductsByCategoryAndPriceBetweenSuccessfully() {
         List<ProductDocument> documents = Arrays.asList(productDocument);
-        BigDecimal minPrice = new BigDecimal("10.00");
-        BigDecimal maxPrice = new BigDecimal("30.00");
+        Long minPrice = 1000L;
+        Long maxPrice = 3000L;
         
-        when(productMongoRepository.findByCategoryAndPriceBetween("LANCHE", minPrice, maxPrice))
+        when(productMongoRepository.findByCategoryAndPriceBetween(CategoryEnum.LANCHE, minPrice, maxPrice))
                 .thenReturn(documents);
         when(modelMapper.map(productDocument, Product.class)).thenReturn(product);
 
-        List<Product> products = productRepositoryAdapter.findByCategoryAndPriceBetween("LANCHE", minPrice, maxPrice);
+        List<Product> products = productRepositoryAdapter.findByCategoryAndPriceBetween(CategoryEnum.LANCHE, minPrice, maxPrice);
 
         assertThat(products).hasSize(1);
         verify(productMongoRepository, times(1))
-                .findByCategoryAndPriceBetween("LANCHE", minPrice, maxPrice);
-    }
-
-    @Test
-    @DisplayName("Should find products by category and price range manual successfully")
-    void shouldFindProductsByCategoryAndPriceRangeManualSuccessfully() {
-        List<ProductDocument> documents = Arrays.asList(productDocument);
-        BigDecimal minPrice = new BigDecimal("10.00");
-        BigDecimal maxPrice = new BigDecimal("30.00");
-        
-        when(productMongoRepository.findByCategoryAndPriceRangeManual("LANCHE", minPrice, maxPrice))
-                .thenReturn(documents);
-        when(modelMapper.map(productDocument, Product.class)).thenReturn(product);
-
-        List<Product> products = productRepositoryAdapter
-                .findByCategoryAndPriceRangeManual("LANCHE", minPrice, maxPrice);
-
-        assertThat(products).hasSize(1);
-        verify(productMongoRepository, times(1))
-                .findByCategoryAndPriceRangeManual("LANCHE", minPrice, maxPrice);
+                .findByCategoryAndPriceBetween(CategoryEnum.LANCHE, minPrice, maxPrice);
     }
 }

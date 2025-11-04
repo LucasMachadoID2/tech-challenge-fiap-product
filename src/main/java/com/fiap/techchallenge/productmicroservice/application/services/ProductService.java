@@ -2,12 +2,12 @@ package com.fiap.techchallenge.productmicroservice.application.services;
 
 import com.fiap.techchallenge.productmicroservice.application.dto.CreateProductRequestDTO;
 import com.fiap.techchallenge.productmicroservice.application.dto.ProductResponseDTO;
+import com.fiap.techchallenge.productmicroservice.domain.entities.CategoryEnum;
 import com.fiap.techchallenge.productmicroservice.domain.entities.Product;
 import com.fiap.techchallenge.productmicroservice.domain.usecases.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,7 +19,6 @@ public class ProductService {
     private final FindAllProductsUseCase findAllProductsUseCase;
     private final DeleteProductByIdUseCase deleteProductByIdUseCase;
     private final FindProductsByCategoryUseCase findProductsByCategoryUseCase;
-    private final FindProductsOnPromotionUseCase findProductsOnPromotionUseCase;
     private final FindProductsByNameUseCase findProductsByNameUseCase;
     private final FindProductsByCategoryAndPriceRangeUseCase findProductsByCategoryAndPriceRangeUseCase;
     private final FindProductsByCategoryAndPriceRangeManualUseCase findProductsByCategoryAndPriceRangeManualUseCase;
@@ -30,7 +29,6 @@ public class ProductService {
                          FindAllProductsUseCase findAllProductsUseCase,
                          DeleteProductByIdUseCase deleteProductByIdUseCase,
                          FindProductsByCategoryUseCase findProductsByCategoryUseCase,
-                         FindProductsOnPromotionUseCase findProductsOnPromotionUseCase,
                          FindProductsByNameUseCase findProductsByNameUseCase,
                          FindProductsByCategoryAndPriceRangeUseCase findProductsByCategoryAndPriceRangeUseCase,
                          FindProductsByCategoryAndPriceRangeManualUseCase findProductsByCategoryAndPriceRangeManualUseCase,
@@ -40,7 +38,6 @@ public class ProductService {
         this.findAllProductsUseCase = findAllProductsUseCase;
         this.deleteProductByIdUseCase = deleteProductByIdUseCase;
         this.findProductsByCategoryUseCase = findProductsByCategoryUseCase;
-        this.findProductsOnPromotionUseCase = findProductsOnPromotionUseCase;
         this.findProductsByNameUseCase = findProductsByNameUseCase;
         this.findProductsByCategoryAndPriceRangeUseCase = findProductsByCategoryAndPriceRangeUseCase;
         this.findProductsByCategoryAndPriceRangeManualUseCase = findProductsByCategoryAndPriceRangeManualUseCase;
@@ -69,15 +66,8 @@ public class ProductService {
         deleteProductByIdUseCase.execute(id);
     }
 
-    public List<ProductResponseDTO> findByCategory(String category) {
+    public List<ProductResponseDTO> findByCategory(CategoryEnum category) {
         return findProductsByCategoryUseCase.execute(category)
-                .stream()
-                .map(this::convertToResponseDTO)
-                .collect(Collectors.toList());
-    }
-
-    public List<ProductResponseDTO> findProductsOnPromotion() {
-        return findProductsOnPromotionUseCase.execute()
                 .stream()
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
@@ -90,14 +80,14 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-    public List<ProductResponseDTO> findByCategoryAndPriceRange(String category, BigDecimal minPrice, BigDecimal maxPrice) {
+    public List<ProductResponseDTO> findByCategoryAndPriceRange(CategoryEnum category, Long minPrice, Long maxPrice) {
         return findProductsByCategoryAndPriceRangeUseCase.execute(category, minPrice, maxPrice)
                 .stream()
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    public List<ProductResponseDTO> findByCategoryAndPriceRangeManual(String category, BigDecimal minPrice, BigDecimal maxPrice) {
+    public List<ProductResponseDTO> findByCategoryAndPriceRangeManual(CategoryEnum category, Long minPrice, Long maxPrice) {
         return findProductsByCategoryAndPriceRangeManualUseCase.execute(category, minPrice, maxPrice)
                 .stream()
                 .map(this::convertToResponseDTO)
@@ -105,8 +95,6 @@ public class ProductService {
     }
 
     private ProductResponseDTO convertToResponseDTO(Product product) {
-        ProductResponseDTO dto = modelMapper.map(product, ProductResponseDTO.class);
-        dto.setEffectivePrice(product.getEffectivePrice());
-        return dto;
+        return modelMapper.map(product, ProductResponseDTO.class);
     }
 }
