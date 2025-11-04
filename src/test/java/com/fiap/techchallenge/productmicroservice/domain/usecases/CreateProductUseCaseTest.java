@@ -1,5 +1,6 @@
 package com.fiap.techchallenge.productmicroservice.domain.usecases;
 
+import com.fiap.techchallenge.productmicroservice.domain.entities.CategoryEnum;
 import com.fiap.techchallenge.productmicroservice.domain.entities.Product;
 import com.fiap.techchallenge.productmicroservice.domain.repositories.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,8 +10,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -30,7 +29,7 @@ class CreateProductUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        product = new Product("Test Product", "Description", new BigDecimal("25.90"), "LANCHE");
+        product = new Product("Test Product", "Description", "http://image.url", 2590L, 2000L, CategoryEnum.LANCHE, 10L);
         product.setId("1");
     }
 
@@ -43,21 +42,9 @@ class CreateProductUseCaseTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getName()).isEqualTo("Test Product");
-        assertThat(result.getPrice()).isEqualByComparingTo(new BigDecimal("25.90"));
-        verify(productRepository, times(1)).save(product);
-    }
-
-    @Test
-    @DisplayName("Should create product with promotion")
-    void shouldCreateProductWithPromotion() {
-        product.applyPromotion(new BigDecimal("19.90"));
-        when(productRepository.save(any(Product.class))).thenReturn(product);
-
-        Product result = createProductUseCase.execute(product);
-
-        assertThat(result).isNotNull();
-        assertThat(result.isOnPromotion()).isTrue();
-        assertThat(result.getPromotionPrice()).isEqualByComparingTo(new BigDecimal("19.90"));
+        assertThat(result.getPrice()).isEqualTo(2590L);
+        assertThat(result.getPriceForClient()).isEqualTo(2000L);
+        assertThat(result.getQuantity()).isEqualTo(10L);
         verify(productRepository, times(1)).save(product);
     }
 

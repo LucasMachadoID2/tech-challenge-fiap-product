@@ -2,6 +2,7 @@ package com.fiap.techchallenge.productmicroservice.application.services;
 
 import com.fiap.techchallenge.productmicroservice.application.dto.CreateProductRequestDTO;
 import com.fiap.techchallenge.productmicroservice.application.dto.ProductResponseDTO;
+import com.fiap.techchallenge.productmicroservice.domain.entities.CategoryEnum;
 import com.fiap.techchallenge.productmicroservice.domain.entities.Product;
 import com.fiap.techchallenge.productmicroservice.domain.usecases.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,14 +13,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -40,9 +39,6 @@ class ProductServiceTest {
     
     @Mock
     private FindProductsByNameUseCase findProductsByNameUseCase;
-    
-    @Mock
-    private FindProductsOnPromotionUseCase findProductsOnPromotionUseCase;
     
     @Mock
     private FindProductsByCategoryAndPriceRangeUseCase findProductsByCategoryAndPriceRangeUseCase;
@@ -66,22 +62,30 @@ class ProductServiceTest {
         testProduct.setId("123");
         testProduct.setName("Test Product");
         testProduct.setDescription("Test Description");
-        testProduct.setPrice(new BigDecimal("25.90"));
-        testProduct.setCategory("LANCHE");
+        testProduct.setImage("http://image.url");
+        testProduct.setPrice(2590L);
+        testProduct.setPriceForClient(2000L);
+        testProduct.setCategory(CategoryEnum.LANCHE);
+        testProduct.setQuantity(10L);
 
         testProductResponse = new ProductResponseDTO();
         testProductResponse.setId("123");
         testProductResponse.setName("Test Product");
         testProductResponse.setDescription("Test Description");
-        testProductResponse.setPrice(new BigDecimal("25.90"));
-        testProductResponse.setCategory("LANCHE");
-        testProductResponse.setEffectivePrice(new BigDecimal("25.90"));
+        testProductResponse.setImage("http://image.url");
+        testProductResponse.setPrice(2590L);
+        testProductResponse.setPriceForClient(2000L);
+        testProductResponse.setCategory(CategoryEnum.LANCHE);
+        testProductResponse.setQuantity(10L);
 
         createRequest = new CreateProductRequestDTO();
         createRequest.setName("Test Product");
         createRequest.setDescription("Test Description");
-        createRequest.setPrice(new BigDecimal("25.90"));
-        createRequest.setCategory("LANCHE");
+        createRequest.setImage("http://image.url");
+        createRequest.setPrice(2590L);
+        createRequest.setPriceForClient(2000L);
+        createRequest.setCategory(CategoryEnum.LANCHE);
+        createRequest.setQuantity(10L);
     }
 
     @Test
@@ -135,14 +139,14 @@ class ProductServiceTest {
     @Test
     void shouldFindProductsByCategory() {
         List<Product> products = Arrays.asList(testProduct);
-        when(findProductsByCategoryUseCase.execute("LANCHE")).thenReturn(products);
+        when(findProductsByCategoryUseCase.execute(CategoryEnum.LANCHE)).thenReturn(products);
         when(modelMapper.map(any(Product.class), eq(ProductResponseDTO.class))).thenReturn(testProductResponse);
 
-        List<ProductResponseDTO> result = productService.findByCategory("LANCHE");
+        List<ProductResponseDTO> result = productService.findByCategory(CategoryEnum.LANCHE);
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals("LANCHE", result.get(0).getCategory());
+        assertEquals(CategoryEnum.LANCHE, result.get(0).getCategory());
     }
 
     @Test
@@ -158,34 +162,15 @@ class ProductServiceTest {
     }
 
     @Test
-    void shouldFindProductsOnPromotion() {
-        testProduct.setOnPromotion(true);
-        testProduct.setPromotionPrice(new BigDecimal("19.90"));
-        testProductResponse.setOnPromotion(true);
-        testProductResponse.setPromotionPrice(new BigDecimal("19.90"));
-        testProductResponse.setEffectivePrice(new BigDecimal("19.90"));
-        
-        List<Product> products = Arrays.asList(testProduct);
-        when(findProductsOnPromotionUseCase.execute()).thenReturn(products);
-        when(modelMapper.map(any(Product.class), eq(ProductResponseDTO.class))).thenReturn(testProductResponse);
-
-        List<ProductResponseDTO> result = productService.findProductsOnPromotion();
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertTrue(result.get(0).isOnPromotion());
-    }
-
-    @Test
     void shouldFindProductsByCategoryAndPriceRange() {
         List<Product> products = Arrays.asList(testProduct);
         when(findProductsByCategoryAndPriceRangeUseCase.execute(
-            anyString(), any(BigDecimal.class), any(BigDecimal.class)
+            any(CategoryEnum.class), any(Long.class), any(Long.class)
         )).thenReturn(products);
         when(modelMapper.map(any(Product.class), eq(ProductResponseDTO.class))).thenReturn(testProductResponse);
 
         List<ProductResponseDTO> result = productService.findByCategoryAndPriceRange(
-            "LANCHE", new BigDecimal("10"), new BigDecimal("30")
+            CategoryEnum.LANCHE, 1000L, 3000L
         );
 
         assertNotNull(result);
@@ -198,36 +183,5 @@ class ProductServiceTest {
 
         assertDoesNotThrow(() -> productService.deleteById("123"));
         verify(deleteProductByIdUseCase, times(1)).execute("123");
-    }
-
-    @Test
-    void shouldCalculateEffectivePriceForProductOnPromotion() {
-        testProduct.setOnPromotion(true);
-        testProduct.setPromotionPrice(new BigDecimal("19.90"));
-        testProductResponse.setOnPromotion(true);
-        testProductResponse.setPromotionPrice(new BigDecimal("19.90"));
-        testProductResponse.setEffectivePrice(new BigDecimal("19.90"));
-        
-        when(modelMapper.map(any(CreateProductRequestDTO.class), eq(Product.class))).thenReturn(testProduct);
-        when(createProductUseCase.execute(any(Product.class))).thenReturn(testProduct);
-        when(modelMapper.map(any(Product.class), eq(ProductResponseDTO.class))).thenReturn(testProductResponse);
-
-        createRequest.setOnPromotion(true);
-        createRequest.setPromotionPrice(new BigDecimal("19.90"));
-        
-        ProductResponseDTO result = productService.createProduct(createRequest);
-
-        assertEquals(new BigDecimal("19.90"), result.getEffectivePrice());
-    }
-
-    @Test
-    void shouldCalculateEffectivePriceForRegularProduct() {
-        when(modelMapper.map(any(CreateProductRequestDTO.class), eq(Product.class))).thenReturn(testProduct);
-        when(createProductUseCase.execute(any(Product.class))).thenReturn(testProduct);
-        when(modelMapper.map(any(Product.class), eq(ProductResponseDTO.class))).thenReturn(testProductResponse);
-
-        ProductResponseDTO result = productService.createProduct(createRequest);
-
-        assertEquals(testProduct.getPrice(), result.getEffectivePrice());
     }
 }

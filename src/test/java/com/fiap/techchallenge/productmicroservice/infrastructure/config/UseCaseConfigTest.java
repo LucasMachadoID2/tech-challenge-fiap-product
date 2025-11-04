@@ -68,13 +68,6 @@ class UseCaseConfigTest {
     }
 
     @Test
-    @DisplayName("Should create FindProductsOnPromotionUseCase bean")
-    void shouldCreateFindProductsOnPromotionUseCaseBean() {
-        FindProductsOnPromotionUseCase useCase = useCaseConfig.findProductsOnPromotionUseCase(productRepository);
-        assertNotNull(useCase);
-    }
-
-    @Test
     @DisplayName("Should create FindProductsByNameUseCase bean")
     void shouldCreateFindProductsByNameUseCaseBean() {
         FindProductsByNameUseCase useCase = useCaseConfig.findProductsByNameUseCase(productRepository);
@@ -86,14 +79,6 @@ class UseCaseConfigTest {
     void shouldCreateFindProductsByCategoryAndPriceRangeUseCaseBean() {
         FindProductsByCategoryAndPriceRangeUseCase useCase = 
             useCaseConfig.findProductsByCategoryAndPriceRangeUseCase(productRepository);
-        assertNotNull(useCase);
-    }
-
-    @Test
-    @DisplayName("Should create FindProductsByCategoryAndPriceRangeManualUseCase bean")
-    void shouldCreateFindProductsByCategoryAndPriceRangeManualUseCaseBean() {
-        FindProductsByCategoryAndPriceRangeManualUseCase useCase = 
-            useCaseConfig.findProductsByCategoryAndPriceRangeManualUseCase(productRepository);
         assertNotNull(useCase);
     }
 }

@@ -40,11 +40,6 @@ public class UseCaseConfig {
     }
 
     @Bean
-    public FindProductsOnPromotionUseCase findProductsOnPromotionUseCase(ProductRepository productRepository) {
-        return new FindProductsOnPromotionUseCase(productRepository);
-    }
-
-    @Bean
     public FindProductsByNameUseCase findProductsByNameUseCase(ProductRepository productRepository) {
         return new FindProductsByNameUseCase(productRepository);
     }

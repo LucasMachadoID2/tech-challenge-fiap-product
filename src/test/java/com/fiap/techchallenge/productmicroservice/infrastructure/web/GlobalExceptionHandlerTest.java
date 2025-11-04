@@ -2,6 +2,7 @@ package com.fiap.techchallenge.productmicroservice.infrastructure.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fiap.techchallenge.productmicroservice.application.dto.CreateProductRequestDTO;
+import com.fiap.techchallenge.productmicroservice.domain.entities.CategoryEnum;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fiap.techchallenge.productmicroservice.application.services.ProductService;
 
-import java.math.BigDecimal;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -40,8 +40,8 @@ class GlobalExceptionHandlerTest {
         CreateProductRequestDTO request = new CreateProductRequestDTO();
         request.setName("Test");
         request.setDescription("Test");
-        request.setPrice(new BigDecimal("10.00"));
-        request.setCategory("LANCHE");
+        request.setPrice(1000L);
+        request.setCategory(CategoryEnum.LANCHE);
         
         mockMvc.perform(post("/api/products")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -58,7 +58,7 @@ class GlobalExceptionHandlerTest {
         CreateProductRequestDTO request = new CreateProductRequestDTO();
         request.setName(""); // Invalid: empty name
         request.setDescription("Test");
-        request.setCategory("LANCHE");
+        request.setCategory(CategoryEnum.LANCHE);
         
         mockMvc.perform(post("/api/products")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -79,8 +79,8 @@ class GlobalExceptionHandlerTest {
         CreateProductRequestDTO request = new CreateProductRequestDTO();
         request.setName("Test");
         request.setDescription("Test");
-        request.setPrice(new BigDecimal("10.00"));
-        request.setCategory("LANCHE");
+        request.setPrice(1000L);
+        request.setCategory(CategoryEnum.LANCHE);
         
         mockMvc.perform(post("/api/products")
                         .contentType(MediaType.APPLICATION_JSON)

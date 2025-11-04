@@ -1,5 +1,6 @@
 package com.fiap.techchallenge.productmicroservice.domain.usecases;
 
+import com.fiap.techchallenge.productmicroservice.domain.entities.CategoryEnum;
 import com.fiap.techchallenge.productmicroservice.domain.entities.Product;
 import com.fiap.techchallenge.productmicroservice.domain.repositories.ProductRepository;
 
@@ -12,8 +13,8 @@ public class FindProductsByCategoryUseCase {
         this.productRepository = productRepository;
     }
 
-    public List<Product> execute(String category) {
-        if (category == null || category.trim().isEmpty()) {
+    public List<Product> execute(CategoryEnum category) {
+        if (category == null) {
             throw new IllegalArgumentException("Categoria é obrigatória");
         }
         return productRepository.findByCategory(category);

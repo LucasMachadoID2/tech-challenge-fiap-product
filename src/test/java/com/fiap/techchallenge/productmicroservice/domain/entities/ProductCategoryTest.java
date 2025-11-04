@@ -8,37 +8,43 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ProductCategoryTest {
 
     @Test
-    @DisplayName("Should validate valid categories")
-    void shouldValidateValidCategories() {
-        assertThat(ProductCategory.isValidCategory("LANCHE")).isTrue();
-        assertThat(ProductCategory.isValidCategory("ACOMPANHAMENTO")).isTrue();
-        assertThat(ProductCategory.isValidCategory("BEBIDA")).isTrue();
-        assertThat(ProductCategory.isValidCategory("SOBREMESA")).isTrue();
-    }
-
-    @Test
-    @DisplayName("Should invalidate invalid category")
-    void shouldInvalidateInvalidCategory() {
-        assertThat(ProductCategory.isValidCategory("INVALID")).isFalse();
-        assertThat(ProductCategory.isValidCategory("")).isFalse();
-        assertThat(ProductCategory.isValidCategory(null)).isFalse();
-    }
-
-    @Test
-    @DisplayName("Should get all categories")
-    void shouldGetAllCategories() {
-        String[] categories = ProductCategory.getAllCategories();
+    @DisplayName("Should have all category enum values")
+    void shouldHaveAllCategoryEnumValues() {
+        CategoryEnum[] categories = CategoryEnum.values();
         
         assertThat(categories).hasSize(4);
-        assertThat(categories).contains("LANCHE", "ACOMPANHAMENTO", "BEBIDA", "SOBREMESA");
+        assertThat(categories).contains(
+            CategoryEnum.LANCHE,
+            CategoryEnum.ACOMPANHAMENTO,
+            CategoryEnum.BEBIDA,
+            CategoryEnum.SOBREMESA
+        );
     }
 
     @Test
-    @DisplayName("Should have correct category constants")
-    void shouldHaveCorrectCategoryConstants() {
-        assertThat(ProductCategory.LANCHE).isEqualTo("LANCHE");
-        assertThat(ProductCategory.ACOMPANHAMENTO).isEqualTo("ACOMPANHAMENTO");
-        assertThat(ProductCategory.BEBIDA).isEqualTo("BEBIDA");
-        assertThat(ProductCategory.SOBREMESA).isEqualTo("SOBREMESA");
+    @DisplayName("Should convert enum to string correctly")
+    void shouldConvertEnumToString() {
+        assertThat(CategoryEnum.LANCHE.toString()).isEqualTo("LANCHE");
+        assertThat(CategoryEnum.ACOMPANHAMENTO.toString()).isEqualTo("ACOMPANHAMENTO");
+        assertThat(CategoryEnum.BEBIDA.toString()).isEqualTo("BEBIDA");
+        assertThat(CategoryEnum.SOBREMESA.toString()).isEqualTo("SOBREMESA");
+    }
+
+    @Test
+    @DisplayName("Should get enum by name")
+    void shouldGetEnumByName() {
+        assertThat(CategoryEnum.valueOf("LANCHE")).isEqualTo(CategoryEnum.LANCHE);
+        assertThat(CategoryEnum.valueOf("ACOMPANHAMENTO")).isEqualTo(CategoryEnum.ACOMPANHAMENTO);
+        assertThat(CategoryEnum.valueOf("BEBIDA")).isEqualTo(CategoryEnum.BEBIDA);
+        assertThat(CategoryEnum.valueOf("SOBREMESA")).isEqualTo(CategoryEnum.SOBREMESA);
+    }
+
+    @Test
+    @DisplayName("Should have correct enum constants")
+    void shouldHaveCorrectEnumConstants() {
+        assertThat(CategoryEnum.LANCHE).isNotNull();
+        assertThat(CategoryEnum.ACOMPANHAMENTO).isNotNull();
+        assertThat(CategoryEnum.BEBIDA).isNotNull();
+        assertThat(CategoryEnum.SOBREMESA).isNotNull();
     }
 }

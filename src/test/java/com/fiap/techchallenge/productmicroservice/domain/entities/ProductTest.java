@@ -3,8 +3,6 @@ package com.fiap.techchallenge.productmicroservice.domain.entities;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -13,13 +11,16 @@ class ProductTest {
     @Test
     @DisplayName("Should create product with valid data")
     void shouldCreateProductWithValidData() {
-        Product product = new Product("Burger", "Delicious burger", new BigDecimal("25.90"), "LANCHE");
+        Product product = new Product("Burger", "Delicious burger", "http://image.url", 
+                2590L, 2000L, CategoryEnum.LANCHE, 10L);
 
         assertThat(product.getName()).isEqualTo("Burger");
         assertThat(product.getDescription()).isEqualTo("Delicious burger");
-        assertThat(product.getPrice()).isEqualByComparingTo(new BigDecimal("25.90"));
-        assertThat(product.getCategory()).isEqualTo("LANCHE");
-        assertThat(product.isOnPromotion()).isFalse();
+        assertThat(product.getImage()).isEqualTo("http://image.url");
+        assertThat(product.getPrice()).isEqualTo(2590L);
+        assertThat(product.getPriceForClient()).isEqualTo(2000L);
+        assertThat(product.getCategory()).isEqualTo(CategoryEnum.LANCHE);
+        assertThat(product.getQuantity()).isEqualTo(10L);
         assertThat(product.getCreatedAt()).isNotNull();
         assertThat(product.getUpdatedAt()).isNotNull();
     }
@@ -27,7 +28,7 @@ class ProductTest {
     @Test
     @DisplayName("Should throw exception when name is null")
     void shouldThrowExceptionWhenNameIsNull() {
-        assertThatThrownBy(() -> new Product(null, "Description", new BigDecimal("25.90"), "LANCHE"))
+        assertThatThrownBy(() -> new Product(null, "Description", "image.url", 2590L, 2000L, CategoryEnum.LANCHE, 10L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Nome do produto é obrigatório");
     }
@@ -35,7 +36,7 @@ class ProductTest {
     @Test
     @DisplayName("Should throw exception when name is empty")
     void shouldThrowExceptionWhenNameIsEmpty() {
-        assertThatThrownBy(() -> new Product("", "Description", new BigDecimal("25.90"), "LANCHE"))
+        assertThatThrownBy(() -> new Product("", "Description", "image.url", 2590L, 2000L, CategoryEnum.LANCHE, 10L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Nome do produto é obrigatório");
     }
@@ -43,7 +44,7 @@ class ProductTest {
     @Test
     @DisplayName("Should throw exception when price is null")
     void shouldThrowExceptionWhenPriceIsNull() {
-        assertThatThrownBy(() -> new Product("Product", "Description", null, "LANCHE"))
+        assertThatThrownBy(() -> new Product("Product", "Description", "image.url", null, 2000L, CategoryEnum.LANCHE, 10L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Preço deve ser maior que zero");
     }
@@ -51,7 +52,7 @@ class ProductTest {
     @Test
     @DisplayName("Should throw exception when price is zero")
     void shouldThrowExceptionWhenPriceIsZero() {
-        assertThatThrownBy(() -> new Product("Product", "Description", BigDecimal.ZERO, "LANCHE"))
+        assertThatThrownBy(() -> new Product("Product", "Description", "image.url", 0L, 2000L, CategoryEnum.LANCHE, 10L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Preço deve ser maior que zero");
     }
@@ -59,7 +60,7 @@ class ProductTest {
     @Test
     @DisplayName("Should throw exception when price is negative")
     void shouldThrowExceptionWhenPriceIsNegative() {
-        assertThatThrownBy(() -> new Product("Product", "Description", new BigDecimal("-10"), "LANCHE"))
+        assertThatThrownBy(() -> new Product("Product", "Description", "image.url", -10L, 2000L, CategoryEnum.LANCHE, 10L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Preço deve ser maior que zero");
     }
@@ -67,93 +68,41 @@ class ProductTest {
     @Test
     @DisplayName("Should throw exception when category is null")
     void shouldThrowExceptionWhenCategoryIsNull() {
-        assertThatThrownBy(() -> new Product("Product", "Description", new BigDecimal("25.90"), null))
+        assertThatThrownBy(() -> new Product("Product", "Description", "image.url", 2590L, 2000L, null, 10L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Categoria é obrigatória");
     }
 
     @Test
-    @DisplayName("Should throw exception when category is empty")
-    void shouldThrowExceptionWhenCategoryIsEmpty() {
-        assertThatThrownBy(() -> new Product("Product", "Description", new BigDecimal("25.90"), ""))
+    @DisplayName("Should throw exception when quantity is negative")
+    void shouldThrowExceptionWhenQuantityIsNegative() {
+        assertThatThrownBy(() -> new Product("Product", "Description", "image.url", 2590L, 2000L, CategoryEnum.LANCHE, -5L))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Categoria é obrigatória");
-    }
-
-    @Test
-    @DisplayName("Should apply promotion successfully")
-    void shouldApplyPromotionSuccessfully() {
-        Product product = new Product("Product", "Description", new BigDecimal("50.00"), "LANCHE");
-        product.applyPromotion(new BigDecimal("35.00"));
-
-        assertThat(product.isOnPromotion()).isTrue();
-        assertThat(product.getPromotionPrice()).isEqualByComparingTo(new BigDecimal("35.00"));
-        assertThat(product.getEffectivePrice()).isEqualByComparingTo(new BigDecimal("35.00"));
-    }
-
-    @Test
-    @DisplayName("Should throw exception when promotion price is greater than or equal to regular price")
-    void shouldThrowExceptionWhenPromotionPriceIsGreaterThanRegularPrice() {
-        Product product = new Product("Product", "Description", new BigDecimal("50.00"), "LANCHE");
-
-        assertThatThrownBy(() -> product.applyPromotion(new BigDecimal("60.00")))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Preço promocional deve ser menor que o preço normal");
-    }
-
-    @Test
-    @DisplayName("Should throw exception when promotion price equals regular price")
-    void shouldThrowExceptionWhenPromotionPriceEqualsRegularPrice() {
-        Product product = new Product("Product", "Description", new BigDecimal("50.00"), "LANCHE");
-
-        assertThatThrownBy(() -> product.applyPromotion(new BigDecimal("50.00")))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Preço promocional deve ser menor que o preço normal");
-    }
-
-    @Test
-    @DisplayName("Should remove promotion successfully")
-    void shouldRemovePromotionSuccessfully() {
-        Product product = new Product("Product", "Description", new BigDecimal("50.00"), "LANCHE");
-        product.applyPromotion(new BigDecimal("35.00"));
-        product.removePromotion();
-
-        assertThat(product.isOnPromotion()).isFalse();
-        assertThat(product.getPromotionPrice()).isNull();
-        assertThat(product.getEffectivePrice()).isEqualByComparingTo(new BigDecimal("50.00"));
+                .hasMessage("Quantidade não pode ser negativa");
     }
 
     @Test
     @DisplayName("Should update price successfully")
     void shouldUpdatePriceSuccessfully() {
-        Product product = new Product("Product", "Description", new BigDecimal("50.00"), "LANCHE");
-        product.updatePrice(new BigDecimal("60.00"));
+        Product product = new Product("Product", "Description", "image.url", 5000L, 4000L, CategoryEnum.LANCHE, 10L);
+        product.updatePrice(6000L);
 
-        assertThat(product.getPrice()).isEqualByComparingTo(new BigDecimal("60.00"));
+        assertThat(product.getPrice()).isEqualTo(6000L);
     }
 
     @Test
-    @DisplayName("Should get effective price as regular price when not on promotion")
-    void shouldGetEffectivePriceAsRegularPriceWhenNotOnPromotion() {
-        Product product = new Product("Product", "Description", new BigDecimal("50.00"), "LANCHE");
+    @DisplayName("Should update quantity successfully")
+    void shouldUpdateQuantitySuccessfully() {
+        Product product = new Product("Product", "Description", "image.url", 5000L, 4000L, CategoryEnum.LANCHE, 10L);
+        product.updateQuantity(20L);
 
-        assertThat(product.getEffectivePrice()).isEqualByComparingTo(new BigDecimal("50.00"));
-    }
-
-    @Test
-    @DisplayName("Should validate promotion correctly")
-    void shouldValidatePromotionCorrectly() {
-        Product product = new Product("Product", "Description", new BigDecimal("50.00"), "LANCHE");
-        assertThat(product.isValidPromotion()).isFalse();
-
-        product.applyPromotion(new BigDecimal("35.00"));
-        assertThat(product.isValidPromotion()).isTrue();
+        assertThat(product.getQuantity()).isEqualTo(20L);
     }
 
     @Test
     @DisplayName("Should set name successfully")
     void shouldSetNameSuccessfully() {
-        Product product = new Product("Product", "Description", new BigDecimal("50.00"), "LANCHE");
+        Product product = new Product("Product", "Description", "image.url", 5000L, 4000L, CategoryEnum.LANCHE, 10L);
         product.setName("New Name");
 
         assertThat(product.getName()).isEqualTo("New Name");
@@ -162,7 +111,7 @@ class ProductTest {
     @Test
     @DisplayName("Should throw exception when setting null name")
     void shouldThrowExceptionWhenSettingNullName() {
-        Product product = new Product("Product", "Description", new BigDecimal("50.00"), "LANCHE");
+        Product product = new Product("Product", "Description", "image.url", 5000L, 4000L, CategoryEnum.LANCHE, 10L);
 
         assertThatThrownBy(() -> product.setName(null))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -172,7 +121,7 @@ class ProductTest {
     @Test
     @DisplayName("Should set description successfully")
     void shouldSetDescriptionSuccessfully() {
-        Product product = new Product("Product", "Description", new BigDecimal("50.00"), "LANCHE");
+        Product product = new Product("Product", "Description", "image.url", 5000L, 4000L, CategoryEnum.LANCHE, 10L);
         product.setDescription("New Description");
 
         assertThat(product.getDescription()).isEqualTo("New Description");
@@ -181,7 +130,7 @@ class ProductTest {
     @Test
     @DisplayName("Should handle null description")
     void shouldHandleNullDescription() {
-        Product product = new Product("Product", null, new BigDecimal("50.00"), "LANCHE");
+        Product product = new Product("Product", null, "image.url", 5000L, 4000L, CategoryEnum.LANCHE, 10L);
         assertThat(product.getDescription()).isEmpty();
 
         product.setDescription(null);
@@ -191,16 +140,16 @@ class ProductTest {
     @Test
     @DisplayName("Should set category successfully")
     void shouldSetCategorySuccessfully() {
-        Product product = new Product("Product", "Description", new BigDecimal("50.00"), "LANCHE");
-        product.setCategory("BEBIDA");
+        Product product = new Product("Product", "Description", "image.url", 5000L, 4000L, CategoryEnum.LANCHE, 10L);
+        product.setCategory(CategoryEnum.BEBIDA);
 
-        assertThat(product.getCategory()).isEqualTo("BEBIDA");
+        assertThat(product.getCategory()).isEqualTo(CategoryEnum.BEBIDA);
     }
 
     @Test
     @DisplayName("Should throw exception when setting null category")
     void shouldThrowExceptionWhenSettingNullCategory() {
-        Product product = new Product("Product", "Description", new BigDecimal("50.00"), "LANCHE");
+        Product product = new Product("Product", "Description", "image.url", 5000L, 4000L, CategoryEnum.LANCHE, 10L);
 
         assertThatThrownBy(() -> product.setCategory(null))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -208,36 +157,33 @@ class ProductTest {
     }
 
     @Test
-    @DisplayName("Should set promotion price with setter")
-    void shouldSetPromotionPriceWithSetter() {
-        Product product = new Product("Product", "Description", new BigDecimal("50.00"), "LANCHE");
-        product.setPromotionPrice(new BigDecimal("35.00"));
+    @DisplayName("Should set image successfully")
+    void shouldSetImageSuccessfully() {
+        Product product = new Product("Product", "Description", "image.url", 5000L, 4000L, CategoryEnum.LANCHE, 10L);
+        product.setImage("new-image.url");
 
-        assertThat(product.getPromotionPrice()).isEqualByComparingTo(new BigDecimal("35.00"));
-        assertThat(product.isOnPromotion()).isTrue();
+        assertThat(product.getImage()).isEqualTo("new-image.url");
     }
 
     @Test
-    @DisplayName("Should remove promotion when setting null promotion price")
-    void shouldRemovePromotionWhenSettingNullPromotionPrice() {
-        Product product = new Product("Product", "Description", new BigDecimal("50.00"), "LANCHE");
-        product.applyPromotion(new BigDecimal("35.00"));
-        product.setPromotionPrice(null);
+    @DisplayName("Should set priceForClient successfully")
+    void shouldSetPriceForClientSuccessfully() {
+        Product product = new Product("Product", "Description", "image.url", 5000L, 4000L, CategoryEnum.LANCHE, 10L);
+        product.setPriceForClient(3500L);
 
-        assertThat(product.getPromotionPrice()).isNull();
-        assertThat(product.isOnPromotion()).isFalse();
+        assertThat(product.getPriceForClient()).isEqualTo(3500L);
     }
 
     @Test
     @DisplayName("Should test equals and hashCode")
     void shouldTestEqualsAndHashCode() {
-        Product product1 = new Product("Product", "Description", new BigDecimal("50.00"), "LANCHE");
+        Product product1 = new Product("Product", "Description", "image.url", 5000L, 4000L, CategoryEnum.LANCHE, 10L);
         product1.setId("1");
 
-        Product product2 = new Product("Product", "Description", new BigDecimal("50.00"), "LANCHE");
+        Product product2 = new Product("Product", "Description", "image.url", 5000L, 4000L, CategoryEnum.LANCHE, 10L);
         product2.setId("1");
 
-        Product product3 = new Product("Other", "Description", new BigDecimal("50.00"), "LANCHE");
+        Product product3 = new Product("Other", "Description", "image.url", 5000L, 4000L, CategoryEnum.LANCHE, 10L);
         product3.setId("2");
 
         assertThat(product1).isEqualTo(product2);
@@ -248,7 +194,7 @@ class ProductTest {
     @Test
     @DisplayName("Should test toString")
     void shouldTestToString() {
-        Product product = new Product("Product", "Description", new BigDecimal("50.00"), "LANCHE");
+        Product product = new Product("Product", "Description", "image.url", 5000L, 4000L, CategoryEnum.LANCHE, 10L);
         product.setId("1");
 
         String toString = product.toString();
@@ -259,23 +205,29 @@ class ProductTest {
     }
 
     @Test
-    @DisplayName("Should trim name and category")
-    void shouldTrimNameAndCategory() {
-        Product product = new Product("  Product  ", "Description", new BigDecimal("50.00"), "  LANCHE  ");
+    @DisplayName("Should trim name")
+    void shouldTrimName() {
+        Product product = new Product("  Product  ", "Description", "image.url", 5000L, 4000L, CategoryEnum.LANCHE, 10L);
 
         assertThat(product.getName()).isEqualTo("Product");
-        assertThat(product.getCategory()).isEqualTo("LANCHE");
     }
 
     @Test
-    @DisplayName("Should create product with constructor with all parameters")
-    void shouldCreateProductWithConstructorWithAllParameters() {
-        Product product = new Product("1", "Product", "Description", 
-                new BigDecimal("50.00"), "LANCHE", true, new BigDecimal("35.00"));
+    @DisplayName("Should create product with constructor with id")
+    void shouldCreateProductWithConstructorWithId() {
+        Product product = new Product("1", "Product", "Description", "image.url",
+                5000L, 4000L, CategoryEnum.LANCHE, 10L);
 
         assertThat(product.getId()).isEqualTo("1");
         assertThat(product.getName()).isEqualTo("Product");
-        assertThat(product.isOnPromotion()).isTrue();
-        assertThat(product.getPromotionPrice()).isEqualByComparingTo(new BigDecimal("35.00"));
+        assertThat(product.getQuantity()).isEqualTo(10L);
+    }
+
+    @Test
+    @DisplayName("Should default quantity to zero when null")
+    void shouldDefaultQuantityToZeroWhenNull() {
+        Product product = new Product("Product", "Description", "image.url", 5000L, 4000L, CategoryEnum.LANCHE, null);
+
+        assertThat(product.getQuantity()).isEqualTo(0L);
     }
 }

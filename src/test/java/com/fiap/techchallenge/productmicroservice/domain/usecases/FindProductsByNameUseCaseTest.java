@@ -1,5 +1,6 @@
 package com.fiap.techchallenge.productmicroservice.domain.usecases;
 
+import com.fiap.techchallenge.productmicroservice.domain.entities.CategoryEnum;
 import com.fiap.techchallenge.productmicroservice.domain.entities.Product;
 import com.fiap.techchallenge.productmicroservice.domain.repositories.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,7 +11,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -33,10 +33,10 @@ class FindProductsByNameUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        product1 = new Product("Margherita Pizza", "Classic pizza", new BigDecimal("45.00"), "LANCHE");
+        product1 = new Product("Margherita Pizza", "Classic pizza", "image.url", 4500L, 4000L, CategoryEnum.LANCHE, 10L);
         product1.setId("1");
 
-        product2 = new Product("Pepperoni Pizza", "Spicy pizza", new BigDecimal("50.00"), "LANCHE");
+        product2 = new Product("Pepperoni Pizza", "Spicy pizza", "image.url", 5000L, 4500L, CategoryEnum.LANCHE, 15L);
         product2.setId("2");
     }
 

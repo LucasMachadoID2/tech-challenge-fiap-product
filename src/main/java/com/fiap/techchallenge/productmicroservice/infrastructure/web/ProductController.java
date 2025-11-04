@@ -3,6 +3,7 @@ package com.fiap.techchallenge.productmicroservice.infrastructure.web;
 import com.fiap.techchallenge.productmicroservice.application.dto.CreateProductRequestDTO;
 import com.fiap.techchallenge.productmicroservice.application.dto.ProductResponseDTO;
 import com.fiap.techchallenge.productmicroservice.application.services.ProductService;
+import com.fiap.techchallenge.productmicroservice.domain.entities.CategoryEnum;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -13,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -76,16 +76,8 @@ public class ProductController {
     @GetMapping("/category/{category}")
     @Operation(summary = "Buscar produtos por categoria", description = "Retorna todos os produtos de uma categoria específica")
     @ApiResponse(responseCode = "200", description = "Lista de produtos da categoria retornada com sucesso")
-    public ResponseEntity<List<ProductResponseDTO>> findByCategory(@PathVariable String category) {
+    public ResponseEntity<List<ProductResponseDTO>> findByCategory(@PathVariable CategoryEnum category) {
         List<ProductResponseDTO> products = productService.findByCategory(category);
-        return ResponseEntity.ok(products);
-    }
-
-    @GetMapping("/promotions")
-    @Operation(summary = "Buscar produtos em promoção", description = "Retorna todos os produtos que estão em promoção")
-    @ApiResponse(responseCode = "200", description = "Lista de produtos em promoção retornada com sucesso")
-    public ResponseEntity<List<ProductResponseDTO>> findProductsOnPromotion() {
-        List<ProductResponseDTO> products = productService.findProductsOnPromotion();
         return ResponseEntity.ok(products);
     }
 
@@ -104,9 +96,9 @@ public class ProductController {
                description = "Retorna produtos de uma categoria dentro de uma faixa de preço")
     @ApiResponse(responseCode = "200", description = "Lista de produtos filtrados retornada com sucesso")
     public ResponseEntity<List<ProductResponseDTO>> findByCategoryAndPriceRange(
-            @PathVariable String category,
-            @Parameter(description = "Preço mínimo") @RequestParam BigDecimal minPrice,
-            @Parameter(description = "Preço máximo") @RequestParam BigDecimal maxPrice) {
+            @PathVariable CategoryEnum category,
+            @Parameter(description = "Preço mínimo") @RequestParam Long minPrice,
+            @Parameter(description = "Preço máximo") @RequestParam Long maxPrice) {
         List<ProductResponseDTO> products = productService.findByCategoryAndPriceRange(category, minPrice, maxPrice);
         return ResponseEntity.ok(products);
     }
@@ -116,9 +108,9 @@ public class ProductController {
                description = "Retorna produtos de uma categoria dentro de uma faixa de preço usando consulta manual")
     @ApiResponse(responseCode = "200", description = "Lista de produtos filtrados retornada com sucesso")
     public ResponseEntity<List<ProductResponseDTO>> findByCategoryAndPriceRangeManual(
-            @PathVariable String category,
-            @Parameter(description = "Preço mínimo") @RequestParam BigDecimal minPrice,
-            @Parameter(description = "Preço máximo") @RequestParam BigDecimal maxPrice) {
+            @PathVariable CategoryEnum category,
+            @Parameter(description = "Preço mínimo") @RequestParam Long minPrice,
+            @Parameter(description = "Preço máximo") @RequestParam Long maxPrice) {
         List<ProductResponseDTO> products = productService.findByCategoryAndPriceRangeManual(category, minPrice, maxPrice);
         return ResponseEntity.ok(products);
     }

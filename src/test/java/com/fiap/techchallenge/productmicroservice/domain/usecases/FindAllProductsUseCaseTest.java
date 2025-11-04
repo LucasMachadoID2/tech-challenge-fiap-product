@@ -1,5 +1,6 @@
 package com.fiap.techchallenge.productmicroservice.domain.usecases;
 
+import com.fiap.techchallenge.productmicroservice.domain.entities.CategoryEnum;
 import com.fiap.techchallenge.productmicroservice.domain.entities.Product;
 import com.fiap.techchallenge.productmicroservice.domain.repositories.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
@@ -33,14 +33,14 @@ class FindAllProductsUseCaseTest {
         product1 = new Product();
         product1.setId("1");
         product1.setName("Product 1");
-        product1.setPrice(new BigDecimal("10.00"));
-        product1.setCategory("LANCHE");
+        product1.setPrice(1000L);
+        product1.setCategory(CategoryEnum.LANCHE);
 
         product2 = new Product();
         product2.setId("2");
         product2.setName("Product 2");
-        product2.setPrice(new BigDecimal("20.00"));
-        product2.setCategory("BEBIDA");
+        product2.setPrice(2000L);
+        product2.setCategory(CategoryEnum.BEBIDA);
     }
 
     @Test
