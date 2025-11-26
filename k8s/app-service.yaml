@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: app-product
+  name: app-product-service
   labels:
-    app: app-product
+    app: app-product-service
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: app-product
   ports:
