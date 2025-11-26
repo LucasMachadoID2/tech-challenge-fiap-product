@@ -9,6 +9,7 @@ NC := \033[0m # No Color
 
 # Variáveis
 APP_NAME := app-product
+SERVICE_NAME := app-product-service
 NAMESPACE := default
 PORT := 8081
 ENV ?= prod
@@ -62,7 +63,7 @@ start: ## Inicia a aplicação (ENV=local ou ENV=prod)
 	@kubectl apply -f k8s/mongodb-service.yaml
 	@echo ""
 	@echo "$(YELLOW)⏳ Aguardando MongoDB ficar pronto...$(NC)"
-	@kubectl wait --for=condition=ready pod -l app=mongodb --timeout=60s || true
+	@kubectl wait --for=condition=ready pod -l app=mongodb --timeout=120s || echo "MongoDB ainda inicializando..."
 	@echo ""
 	@echo "$(YELLOW)🏗️  4. Aplicando Aplicação...$(NC)"
 	@kubectl apply -f k8s/app-deployment.yaml
@@ -72,7 +73,24 @@ start: ## Inicia a aplicação (ENV=local ou ENV=prod)
 	@kubectl apply -f k8s/hpa.yaml
 	@echo ""
 	@echo "$(YELLOW)⏳ Aguardando pods da aplicação ficarem prontos...$(NC)"
-	@kubectl wait --for=condition=ready pod -l app=$(APP_NAME) --timeout=120s || true
+	@sleep 5
+	@for i in 1 2 3 4 5 6 7 8 9 10 11 12; do \
+		POD_READY=$$(kubectl get pods -l app=app-product -o jsonpath='{.items[0].status.conditions[?(@.type=="Ready")].status}' 2>/dev/null || echo "False"); \
+		if [ "$$POD_READY" = "True" ]; then \
+			echo "$(GREEN)✅ Pods prontos!$(NC)"; \
+			break; \
+		fi; \
+		echo "Aguardando... ($$i/12)"; \
+		sleep 5; \
+	done
+	@kubectl get pods -l app=app-product
+	@echo ""
+	@POD_STATUS=$$(kubectl get pods -l app=app-product -o jsonpath='{.items[0].status.phase}' 2>/dev/null || echo "NotFound"); \
+	if [ "$$POD_STATUS" != "Running" ]; then \
+		echo "$(YELLOW)⚠️  Pods não estão Running. Status: $$POD_STATUS$(NC)"; \
+		echo "$(YELLOW)Verificando eventos...$(NC)"; \
+		kubectl describe pods -l app=app-product | grep -A 10 Events || true; \
+	fi
 	@echo ""
 	@echo "$(GREEN)✅ Aplicação iniciada com sucesso - $(ENV_LABEL)!$(NC)"
 	@echo ""
@@ -88,7 +106,7 @@ ifeq ($(ENV),local)
 	@echo ""
 	@echo "$(YELLOW)⚠️  Pressione Ctrl+C para parar o port-forward e encerrar$(NC)"
 	@echo ""
-	@kubectl port-forward service/$(APP_NAME) $(PORT):80
+	@kubectl port-forward service/$(SERVICE_NAME) $(PORT):80
 else
 	@echo "$(GREEN)✅ Aplicação disponível no cluster Kubernetes!$(NC)"
 	@echo ""
@@ -162,7 +180,7 @@ port-forward: ## Cria port-forward para acessar a aplicação localmente
 	@echo ""
 	@echo "$(YELLOW)⚠️  Pressione Ctrl+C para parar o port-forward$(NC)"
 	@echo ""
-	@kubectl port-forward service/$(APP_NAME) $(PORT):80
+	@kubectl port-forward service/$(SERVICE_NAME) $(PORT):80
 
 build: ## Compila o projeto com Maven
 	@echo "$(YELLOW)🔨 Compilando projeto...$(NC)"
