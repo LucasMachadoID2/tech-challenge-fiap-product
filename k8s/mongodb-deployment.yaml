@@ -17,15 +17,17 @@ spec:
       containers:
         - name: mongodb
           image: mongo:7.0
+          args: ["--config", "/etc/mongo/mongod.conf"]
           ports:
             - containerPort: 27018
-          env:
-            - name: MONGO_INITDB_ROOT_USERNAME
-              value: ${MONGODB_USERNAME}
-            - name: MONGO_INITDB_ROOT_PASSWORD
-              value: ${MONGODB_PASSWORD}
-            - name: MONGO_INITDB_DATABASE
-              value: product_db
+          envFrom:
+            - configMapRef:
+                name: mongodb-config
+            - secretRef:
+                name: mongodb-secrets
+          volumeMounts:
+            - name: mongodb-config
+              mountPath: /etc/mongo
           resources:
             requests:
               cpu: "100m"
@@ -33,3 +35,7 @@ spec:
             limits:
               cpu: "500m"
               memory: "512Mi"
+      volumes:
+        - name: mongodb-config
+          configMap:
+            name: mongodb-config
