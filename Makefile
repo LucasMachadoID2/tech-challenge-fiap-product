@@ -16,15 +16,9 @@ ENV ?= prod
 
 # Arquivos por ambiente
 ifeq ($(ENV),local)
-	SECRET_FILE := k8s/secret.local.yaml
-	MONGODB_CONFIG_FILE := k8s/mongodb-configmap.local.yaml
-	MONGODB_DEPLOYMENT_FILE := k8s/mongodb-deployment.local.yaml
 	ENV_LABEL := 💻 LOCAL
 	ENV_COLOR := $(BLUE)
 else
-	SECRET_FILE := k8s/secret.yaml
-	MONGODB_CONFIG_FILE := k8s/mongodb-configmap.yaml
-	MONGODB_DEPLOYMENT_FILE := k8s/mongodb-deployment.yaml
 	ENV_LABEL := 🚀 PRODUÇÃO
 	ENV_COLOR := $(RED)
 endif
@@ -53,13 +47,14 @@ start: ## Inicia a aplicação (ENV=local ou ENV=prod)
 	@echo ""
 	@echo "$(YELLOW)📦 1. Aplicando ConfigMaps...$(NC)"
 	@kubectl apply -f k8s/configmap.yaml
-	@kubectl apply -f $(MONGODB_CONFIG_FILE)
+	@kubectl apply -f k8s/mongodb-configmap.yaml
 	@echo ""
 	@echo "$(YELLOW)🔐 2. Aplicando Secrets...$(NC)"
-	@kubectl apply -f $(SECRET_FILE)
+	@kubectl apply -f k8s/secret.yaml
+	@kubectl apply -f k8s/mongodb-secrets.yaml
 	@echo ""
 	@echo "$(YELLOW)🗄️  3. Aplicando MongoDB...$(NC)"
-	@kubectl apply -f $(MONGODB_DEPLOYMENT_FILE)
+	@kubectl apply -f k8s/mongodb-deployment.yaml
 	@kubectl apply -f k8s/mongodb-service.yaml
 	@echo ""
 	@echo "$(YELLOW)⏳ Aguardando MongoDB ficar pronto...$(NC)"
@@ -97,16 +92,14 @@ start: ## Inicia a aplicação (ENV=local ou ENV=prod)
 	@make status
 	@echo ""
 ifeq ($(ENV),local)
-	@echo "$(YELLOW)🌐 Iniciando port-forward automaticamente...$(NC)"
-	@echo ""
-	@echo "$(GREEN)🔗 URLs disponíveis:$(NC)"
+	@echo "$(GREEN)🔗 URLs disponíveis (após port-forward):$(NC)"
 	@echo "  - Swagger UI:    http://localhost:$(PORT)/swagger-ui.html"
 	@echo "  - API Docs:      http://localhost:$(PORT)/api-docs"
 	@echo "  - Health Check:  http://localhost:$(PORT)/actuator/health"
 	@echo ""
-	@echo "$(YELLOW)⚠️  Pressione Ctrl+C para parar o port-forward e encerrar$(NC)"
+	@echo "$(YELLOW)💡 Para acessar localmente, execute:$(NC)"
+	@echo "   make port-forward"
 	@echo ""
-	@kubectl port-forward service/$(SERVICE_NAME) $(PORT):80
 else
 	@echo "$(GREEN)✅ Aplicação disponível no cluster Kubernetes!$(NC)"
 	@echo ""
@@ -125,9 +118,10 @@ stop: ## Para e remove todos os recursos (ENV=local ou ENV=prod)
 	@kubectl delete -f k8s/app-service.yaml --ignore-not-found=true
 	@kubectl delete -f k8s/app-deployment.yaml --ignore-not-found=true
 	@kubectl delete -f k8s/mongodb-service.yaml --ignore-not-found=true
-	@kubectl delete -f $(MONGODB_DEPLOYMENT_FILE) --ignore-not-found=true
-	@kubectl delete -f $(SECRET_FILE) --ignore-not-found=true
-	@kubectl delete -f $(MONGODB_CONFIG_FILE) --ignore-not-found=true
+	@kubectl delete -f k8s/mongodb-deployment.yaml --ignore-not-found=true
+	@kubectl delete -f k8s/mongodb-secrets.yaml --ignore-not-found=true
+	@kubectl delete -f k8s/secret.yaml --ignore-not-found=true
+	@kubectl delete -f k8s/mongodb-configmap.yaml --ignore-not-found=true
 	@kubectl delete -f k8s/configmap.yaml --ignore-not-found=true
 	@echo ""
 	@echo "$(GREEN)✅ Aplicação parada - $(ENV_LABEL)!$(NC)"

@@ -91,3 +91,4 @@ application-local.properties
 # Kubernetes - Local files with sensitive data
 k8s/*.local.yaml
 k8s/*-local.yaml
+k8s/mongodb-secrets.local.yaml
