@@ -1,8 +1,11 @@
 package com.fiap.techchallenge.productmicroservice.application.dto;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fiap.techchallenge.productmicroservice.domain.entities.CategoryEnum;
 import jakarta.validation.constraints.*;
 
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class CreateProductRequestDTO {
     @NotBlank(message = "Nome é obrigatório")
     @Size(min = 2, max = 100, message = "Nome deve ter entre 2 e 100 caracteres")
