@@ -325,7 +325,7 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.id").value("full-1"))
                 .andExpect(jsonPath("$.name").value("Complete Product"))
                 .andExpect(jsonPath("$.price").value(5000))
-                .andExpect(jsonPath("$.priceForClient").value(4500))
+                .andExpect(jsonPath("$.price_for_client").value(4500))
                 .andExpect(jsonPath("$.quantity").value(100));
 
         verify(productService, times(1)).createProduct(any(CreateProductRequestDTO.class));

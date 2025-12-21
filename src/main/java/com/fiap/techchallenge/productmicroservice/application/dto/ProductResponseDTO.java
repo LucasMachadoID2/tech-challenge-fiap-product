@@ -1,9 +1,12 @@
 package com.fiap.techchallenge.productmicroservice.application.dto;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fiap.techchallenge.productmicroservice.domain.entities.CategoryEnum;
 
 import java.time.LocalDateTime;
 
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class ProductResponseDTO {
     private String id;
     private String name;
@@ -17,7 +20,6 @@ public class ProductResponseDTO {
     private LocalDateTime updatedAt;
 
     public ProductResponseDTO() {}
-
     public ProductResponseDTO(String id, String name, String description, String image, 
                              Long price, Long priceForClient, CategoryEnum category, 
                              Long quantity, LocalDateTime createdAt, LocalDateTime updatedAt) {
