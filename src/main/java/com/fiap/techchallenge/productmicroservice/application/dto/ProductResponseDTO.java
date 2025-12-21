@@ -20,7 +20,6 @@ public class ProductResponseDTO {
     private LocalDateTime updatedAt;
 
     public ProductResponseDTO() {}
-
     public ProductResponseDTO(String id, String name, String description, String image, 
                              Long price, Long priceForClient, CategoryEnum category, 
                              Long quantity, LocalDateTime createdAt, LocalDateTime updatedAt) {
