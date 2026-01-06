@@ -14,7 +14,7 @@ Este é um microserviço dedicado ao gerenciamento de produtos, desenvolvido em 
 - ✅ Buscar produtos por categoria e faixa de preço
 - ✅ Buscar produtos por categoria e faixa de preço (implementação manual)
 
-## 🏗️ Cobertura de testes
+##  Cobertura de testes
 
 ![img.png](img.png)
 
