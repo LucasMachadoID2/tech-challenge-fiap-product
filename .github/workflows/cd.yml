@@ -64,45 +64,9 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      
-      - name: Extract version from pom.xml
-        id: version
-        run: |
-          if ! command -v mvn &> /dev/null; then
-          echo "❌ Maven not found"
-          exit 1
-          fi
-    
-          if [ ! -f "pom.xml" ]; then
-          echo "❌ pom.xml not found"
-          exit 1
-          fi
-    
-          echo "🔍 Extracting version..."
-          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout 2>/dev/null | grep -v '\[' | tail -n1)
-          
-          if [ -z "$VERSION" ]; then
-              echo "❌ Failed to extract version, trying alternative method..."
-              VERSION=$(grep -oP '<version>\K[^<]+' pom.xml | head -1)
-          fi
-          
-          if [ -n "$VERSION" ]; then
-              echo "✅ Version: $VERSION"
-              echo "version=$VERSION" >> $GITHUB_OUTPUT
-          else
-              echo "❌ Could not extract version"
-              exit 1
-          fi
 
-      
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/tech-challenge-fiap-product:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/tech-challenge-fiap-product:${{ steps.version.outputs.version }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/tech-challenge-fiap-product:${{ github.sha }}
-          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/tech-challenge-fiap-product:buildcache
-          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/tech-challenge-fiap-product:buildcache,mode=max
+      - name: Build docker image
+        run: docker build -t gguihermegarcia1/tech-challenge-fiap-product .
+
+      - name: Push image docker
+        run: docker push gguihermegarcia1/tech-challenge-fiap-product
