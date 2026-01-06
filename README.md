@@ -18,6 +18,10 @@ Este é um microserviço dedicado ao gerenciamento de produtos, desenvolvido em 
 
 O projeto segue os princípios da **Clean Architecture**:
 
+## 🏗️ Cobertura de testes
+
+![img.png](img.png)
+
 ```
 ├── domain/
 │   ├── entities/        # Entidades de negócio
