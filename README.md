@@ -14,13 +14,13 @@ Este é um microserviço dedicado ao gerenciamento de produtos, desenvolvido em 
 - ✅ Buscar produtos por categoria e faixa de preço
 - ✅ Buscar produtos por categoria e faixa de preço (implementação manual)
 
-## 🏗️ Arquitetura
-
-O projeto segue os princípios da **Clean Architecture**:
-
 ## 🏗️ Cobertura de testes
 
 ![img.png](img.png)
+
+## 🏗️ Arquitetura
+
+O projeto segue os princípios da **Clean Architecture**:
 
 ```
 ├── domain/
