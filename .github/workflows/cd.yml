@@ -66,11 +66,34 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       
       - name: Extract version from pom.xml
-        id: version
+        id: extract_version
         run: |
-          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Version: $VERSION"
+          if ! command -v mvn &> /dev/null; then
+          echo "❌ Maven not found"
+          exit 1
+          fi
+    
+          if [ ! -f "pom.xml" ]; then
+          echo "❌ pom.xml not found"
+          exit 1
+          fi
+    
+          echo "🔍 Extracting version..."
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout 2>/dev/null | grep -v '\[' | tail -n1)
+          
+          if [ -z "$VERSION" ]; then
+              echo "❌ Failed to extract version, trying alternative method..."
+              VERSION=$(grep -oP '<version>\K[^<]+' pom.xml | head -1)
+          fi
+          
+          if [ -n "$VERSION" ]; then
+              echo "✅ Version: $VERSION"
+              echo "version=$VERSION" >> $GITHUB_OUTPUT
+          else
+              echo "❌ Could not extract version"
+              exit 1
+          fi
+
       
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
